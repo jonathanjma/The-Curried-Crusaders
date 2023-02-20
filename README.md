@@ -2,5 +2,5 @@
 
 ## OCaml Project Team sponsored by camels.
 
-Members:
-Zachary Seidner (zes4)
+### Members:
+- Zachary Seidner (zes4)
