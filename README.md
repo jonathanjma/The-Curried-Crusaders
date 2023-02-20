@@ -1,4 +1,4 @@
-# The-Curried-Crusaders
+# The Curried Crusaders
 
 OCaml Project Team sponsored by camels.
 
