@@ -5,3 +5,4 @@
 ### Members:
 - Zachary Seidner (zes4)  
 - Jonathan Ma (jjm498)
+- Alex Wang (ayw29)
