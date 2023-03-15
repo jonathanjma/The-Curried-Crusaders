@@ -13,7 +13,19 @@ open Ast
 %token LBRAC
 %token RBRAC
 %token COMMA
+%token PLUS
+%token FORK
+%token PIE
+%token TIMES
+%token LPAREN
+%token RPAREN
 %token EOF
+
+(* lower precedence operators *)
+%left FORK
+%left PLUS
+%left TIMES
+(* higher precedence operators *)
 
 %start <Ast.expr> prog
 
@@ -29,7 +41,12 @@ expr:
   | s = RCP { Rcp s }
   | c = ING { Ing c }
   | b = BOOL { Bool b }
+  | PIE { Joul Float.pi }
   | TRUE { Bool true }
   | FALSE { Bool false }
-  | l = BOWL { Bowl l }
+  | LBRAC; l = BOWL; RBRAC { Bowl l }
+  | e1 = expr; PLUS; e2 = expr { Binop (Add, e1, e2) }
+  | e1 = expr; FORK; e2 = expr { Binop (Fork, e1, e2) }
+  | e1 = expr; TIMES; e2 = expr { Binop (Mult, e1, e2) }
+  | LPAREN; e = expr; RPAREN { e }
   ;
