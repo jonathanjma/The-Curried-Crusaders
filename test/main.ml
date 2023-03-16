@@ -31,6 +31,8 @@ let tests = [
 
   parse_string_expression_test "\"a\" should parse to a" "a" "\"a\"";
   parse_string_expression_test "\"abcde\" + \"a\" should parse to abcdea" "abcdea" "\"abcde\" + \"a\"";
+  parse_string_expression_test "\"a\" + 1 should parse to a1" "a1" "\"a\" + 1" ;
+  parse_string_expression_test "" "2a31" "1 + 1 + \"a\" + 3 + 1";
 ]
 
 let _ = run_test_tt_main ("suite" >::: tests)
