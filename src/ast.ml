@@ -21,3 +21,4 @@ type expr =
   | Bool of bool
   | Bowl of expr list
   | Binop of bop * expr * expr
+  | LetExpression of string * expr * expr

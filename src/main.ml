@@ -57,7 +57,6 @@ let interp (s: string): string =
   s |> parse |> eval |> string_of_val
 
 
-
 let nl_l (level: int): string =
   "\n" ^ (String.make level ' ')
 
@@ -84,6 +83,18 @@ let rec pretty_print (e: expr) (level: int): string =
       let pp_e1: string = pretty_print e1 (level + 1) in 
       let pp_e2: string = pretty_print e2 (level + 1) in
       "Binop (" ^ (nl_l (level + 1)) ^ bop_string ^ ",\n"^ pp_e1 ^ ",\n" ^ pp_e2 ^ (nl_l (level)) ^ ")"
+
+
+
+    | LetExpression (name, e1, e2) -> 
+      let name_string: string = (nl_l (level + 1)) ^ name in
+      let e1_string: string = pretty_print e1 (level + 1) in
+      let e2_string: string = pretty_print e2 (level + 1) in
+      let end_paren_string: string = (nl_l level) ^ ")" in
+
+      "Let (" ^ name_string ^ "," ^ e1_string ^ "," ^ e2_string ^ end_paren_string
+
+
     
     | _ -> failwith "unimplemented"
 

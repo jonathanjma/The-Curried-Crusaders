@@ -16,7 +16,6 @@ let parse_string_expression_test name expected_output string_expression =
   )
 
 
-
 let tests = [
   parse_int_expression_test "0 should parse to 0" 0 "0";
   parse_int_expression_test "6 should parse to 6" 6 "6";
@@ -37,3 +36,9 @@ let tests = [
 ]
 
 let _ = run_test_tt_main ("suite" >::: tests);
+
+(* 
+let tree: Ast.expr = parse "let aa cook 1 + 1 in let bb cook 2 + 2 in 3" in
+let str: string = pretty_print tree 0 in
+print_endline str
+*)

@@ -32,6 +32,9 @@ rule read =
   | "]" { RBRAC }
   | "," { COMMA }
   | "PIE" { PIE }
+  | "cook" {COOK}
+  | "let" {LET}
+  | "in" {IN}
   | rcp { RCP (Lexing.lexeme lexbuf) }
   | cal { CAL (int_of_string (Lexing.lexeme lexbuf)) }
   | joul { JOUL (float_of_string (Lexing.lexeme lexbuf)) }
