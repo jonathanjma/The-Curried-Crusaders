@@ -32,6 +32,7 @@
 \<binop> ::= \<bop> $*$ ( \<cal> | \<joul>) $*$ (\<cal> | \<joul>) \
 \<expr> ::= \<cal> | \<joul> | \<rcp> | \<ing> | \<bool> | \<bowl> | \<binop> \
 \<statement> ::= \<let statement> | \<ternary statement>
+\<identifier> ::= \<cal> | \<joul> | \<rcp> | \<ing> | \<bool> | \<bowl> | \<function_decl> | \<unit>
 
 ## Control structures
 
