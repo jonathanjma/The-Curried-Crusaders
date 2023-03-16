@@ -72,5 +72,5 @@
 
 ## Declarations
 
-\<function declaration> ::= `curry` \<rcp> `cook` \<expr> \
+\<function_decl> ::= `curry` \<rcp> `cook` \<expr> \
 \<module_decl> ::= `shelf` \<rcp> `build` \<decl>\* `end`
