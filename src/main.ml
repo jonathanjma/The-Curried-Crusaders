@@ -48,9 +48,45 @@ and step_binop bop e1 e2 = match (bop, e1, e2) with
 | _ -> failwith "Precondition violated"
  
 
+
 (** [eval e] evaluates [e] to some value [v].  *)
 let rec eval (e: expr): expr = 
   if is_value e then e else e |> step |> eval
 
 let interp (s: string): string = 
   s |> parse |> eval |> string_of_val
+
+
+
+let nl_l (level: int): string =
+  "\n" ^ (String.make level ' ')
+
+let rec pretty_print (e: expr) (level: int): string =
+
+  (* first, print the indentations *)
+  
+  let indentations: string = String.make level ' ' in
+
+  let rest: string =
+    match e with
+    | Cal a -> 
+      let cal_string: string = a |> string_of_int in
+      "Cal (" ^ cal_string ^ ")"
+
+    | Rcp a -> let rcp_string: string = a in
+      "Rcp (" ^ rcp_string ^ ")"
+
+    | Joul a -> let joul_string: string = a |> string_of_float in
+      "Joul (" ^ joul_string ^ ")"  
+
+    | Binop (bop, e1, e2) ->
+      let bop_string: string = bop_to_string bop in
+      let pp_e1: string = pretty_print e1 (level + 1) in 
+      let pp_e2: string = pretty_print e2 (level + 1) in
+      "Binop (" ^ (nl_l (level + 1)) ^ bop_string ^ ",\n"^ pp_e1 ^ ",\n" ^ pp_e2 ^ (nl_l (level)) ^ ")"
+    
+    | _ -> failwith "unimplemented"
+
+    in
+
+  indentations ^ rest

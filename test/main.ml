@@ -1,8 +1,6 @@
 open OUnit2
 open Interp
-(* open Ast *)
 open Main
-
 
 let id x = x
 
@@ -16,6 +14,8 @@ let parse_string_expression_test name expected_output string_expression =
   name >:: (
     fun _ -> assert_equal expected_output (interp string_expression) ~printer:id
   )
+
+
 
 let tests = [
   parse_int_expression_test "0 should parse to 0" 0 "0";
@@ -33,6 +33,7 @@ let tests = [
   parse_string_expression_test "\"abcde\" + \"a\" should parse to abcdea" "abcdea" "\"abcde\" + \"a\"";
   parse_string_expression_test "\"a\" + 1 should parse to a1" "a1" "\"a\" + 1" ;
   parse_string_expression_test "" "2a31" "1 + 1 + \"a\" + 3 + 1";
+
 ]
 
-let _ = run_test_tt_main ("suite" >::: tests)
+let _ = run_test_tt_main ("suite" >::: tests);
