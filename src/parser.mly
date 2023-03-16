@@ -45,7 +45,7 @@ prog:
 expr:
   | i = CAL { Cal i }
   | f = JOUL { Joul f }
-  | s = RCP { Rcp s }
+  | DOUBLE_QUOTE; s = RCP; DOUBLE_QUOTE { Rcp s }
   | c = ING { Ing c }
   | b = BOOL { Bool b }
   | PIE { Joul Float.pi }

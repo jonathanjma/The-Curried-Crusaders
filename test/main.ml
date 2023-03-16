@@ -29,8 +29,8 @@ let tests = [
   parse_float_expression_test "2.0 should parse to 2.0" 2.0 "2.0";
   parse_float_expression_test "PIE should parse to 3.141..." Float.pi "PIE";
 
-  parse_string_expression_test "a should parse to a" "a" "a";
-  parse_string_expression_test "a + b should parse to ab" "ab" "a + b";
+  parse_string_expression_test "\"a\" should parse to a" "a" "\"a\"";
+  parse_string_expression_test "\"abcde\" + \"a\" should parse to abcdea" "abcdea" "\"abcde\" + \"a\"";
 ]
 
 let _ = run_test_tt_main ("suite" >::: tests)
