@@ -5,6 +5,9 @@ type bop =
   | Fork (* Fork is the xor operator (xor logic gate looks like fork) *)
 
 (** The type of the abstract syntax tree (AST). *)
+
+type name = string
+
 type expr =
   | Cal of int
   | Joul of float

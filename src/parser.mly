@@ -21,9 +21,16 @@ open Ast
 %token RPAREN
 %token EOF
 
+%token DOUBLE_QUOTE
+
+%token LET
+%token COOK
+%token IN
+
 (* lower precedence operators *)
 %left FORK
 %left PLUS
+%left CONCAT
 %left TIMES
 (* higher precedence operators *)
 

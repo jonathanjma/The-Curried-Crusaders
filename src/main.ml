@@ -12,6 +12,7 @@ let string_of_val (e: expr): string =
   match e with 
   | Cal c -> string_of_int c
   | Joul j -> string_of_float j
+  | Rcp s -> s
   | Binop _ -> failwith "Precondition violated"
   | _ -> failwith "Unimplemented"
 
@@ -19,6 +20,7 @@ let string_of_val (e: expr): string =
 let is_value (e: expr): bool = match e with
   | Cal _ -> true
   | Joul _ -> true
+  | Rcp _ -> true
   | Binop _ -> false
   | _ -> failwith "Unimplemented"
 
@@ -27,6 +29,7 @@ let is_value (e: expr): bool = match e with
 let rec step: expr -> expr = function 
   | Cal _ -> failwith "Doesn't step"
   | Joul _ -> failwith "Doesn't step"
+  | Rcp _ -> failwith "Doesn't step"
   | Binop (bop, e1, e2) when is_value e1 && is_value e2 ->
      step_binop bop e1 e2
   | Binop (bop, e1, e2) when is_value e1 -> Binop (bop, e1, step e2)
@@ -39,6 +42,7 @@ and step_binop bop e1 e2 = match (bop, e1, e2) with
 | Add, Cal a, Cal b -> Cal (a + b)
 | Mult, Cal a, Cal b -> Cal (a * b)
 | Fork, Cal a, Cal b -> Cal (Int.logxor a b)
+| Add, Rcp a, Rcp b -> Rcp (a ^ b)
 | _ -> failwith "Precondition violated"
  
 
