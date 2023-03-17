@@ -13,7 +13,7 @@ let rcp = letter+
 
 let digit = ['0'-'9']
 let int = '-'? digit+
-let white = [' ' '\t']+
+let white = [' ' '\t' '\n']+
 
 
 

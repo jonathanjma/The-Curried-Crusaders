@@ -36,6 +36,7 @@ let tests =
 let _ = run_test_tt_main ("suite" >::: tests);
 
 (*
-let tree: Ast.expr = parse "let f cook (curry n cook n + 1) in 1" in
+let tree: Ast.expr = parse "1"
+in
    let str: string = pretty_print tree 0 in print_endline str
 *)
