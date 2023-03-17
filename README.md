@@ -28,7 +28,7 @@
 
 ## Cooked (non-primitive) types
 
-\<bowl> ::= `[` \<expr>\* `]` \
+\<bowl> ::= `[` \<expr>\* `,` \<expr>* `]` \
 \<binop> ::= \<bop> $*$ ( \<cal> | \<joul>) $*$ (\<cal> | \<joul>) \
 \<expr> ::= \<cal> | \<joul> | \<rcp> | \<ing> | \<bool> | \<bowl> | \<binop> \
 \<statement> ::= \<let statement> | \<ternary statement>
