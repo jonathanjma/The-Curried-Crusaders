@@ -10,3 +10,7 @@ test:
 
 clean:
 	dune clean
+
+cloc:
+	dune clean
+	cloc --by-file --include-lang=OCaml .

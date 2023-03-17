@@ -6,12 +6,10 @@ type bop =
 
 (** The type of the abstract syntax tree (AST). *)
 
-
-let bop_to_string: bop -> string = function
+let bop_to_string : bop -> string = function
   | Add -> "ADD"
   | Mult -> "MULT"
   | Fork -> "FORK"
-
 
 type expr =
   | Cal of int
