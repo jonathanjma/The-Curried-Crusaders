@@ -22,5 +22,6 @@ type expr =
   | LetExpression of string * expr * expr
   | Function of string * expr
   | Identifier of string
+  | FunctionApp of expr * expr
   (* string is the parameter*)
   (* expr is the body of the function *)

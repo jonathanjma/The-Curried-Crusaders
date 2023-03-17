@@ -36,7 +36,12 @@ let tests =
 let _ = run_test_tt_main ("suite" >::: tests);
 
 (*
-let tree: Ast.expr = parse "1"
+let tree: Ast.expr = parse "
+
+f f 1
+
+"
 in
    let str: string = pretty_print tree 0 in print_endline str
+
 *)

@@ -76,7 +76,11 @@ value:
   | FALSE { Bool false }
   | LBRAC; l = BOWL; RBRAC { Bowl l }
   | f = function_value {f}
+  | a = function_app {a}
   ;
 function_value:
   | CURRY; a = RCP; COOK; e = expr {Function (a, e)}
   ;
+
+function_app:
+  | e1 = expr; e2 = expr {FunctionApp (e1, e2)}

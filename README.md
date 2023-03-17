@@ -75,3 +75,17 @@
 
 \<function> ::= `curry` \<rcp> `cook` \<expr> \
 \<module_decl> ::= `shelf` \<rcp> `build` \<decl>\* `end`
+
+## Functions
+\<function_app> ::= (e1: expr) (e2: expr)
+
+- static semantics
+  - e1 evaluates to a function
+  - if e1 : t1 -> t2
+    - and e2 : t1
+    - then e1 e2 : t2
+
+- dynamic semantics
+  - evaluate e1 to a value f1
+  - evalute e2 to a value v2
+  - evalute f1 v2 using the the definition of f

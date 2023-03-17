@@ -53,7 +53,7 @@ let nl_l (level : int) : string = "\n" ^ String.make level ' '
 
 let rec pretty_print (e : expr) (level : int) : string =
   (* first, print the indentations *)
-  let indentations : string = String.make level ' ' in
+  let indentations : string = String.make (level * 2) ' ' in
 
   let rest : string =
     match e with
@@ -83,14 +83,20 @@ let rec pretty_print (e : expr) (level : int) : string =
         let e2_string : string = pretty_print e2 (level + 1) in
         let end_paren_string : string = nl_l level ^ ")" in
 
-        "Let (" ^ name_string ^ "," ^ e1_string ^ "," ^ e2_string
+        "Let (" ^ name_string ^ ",\n" ^ e1_string ^ "," ^ e2_string
         ^ end_paren_string
 
     | Function (n, e) ->
       let arg_string: string = nl_l (level + 1) ^ n in
       let body_string: string = pretty_print e (level + 1) in
       let end_paren_string : string = nl_l level ^ ")" in
-      "Func (" ^ arg_string ^ "," ^ body_string ^ "," ^ end_paren_string
+      "Func (" ^ arg_string ^ ",\n" ^ body_string ^ "," ^ end_paren_string
+
+    | FunctionApp (e1, e2) ->
+      let e1_string : string = pretty_print e1 (level + 1) in
+      let e2_string : string = pretty_print e2 (level + 1) in
+      let end_paren_string : string = nl_l level ^ ")" in
+      "FuncApp (\n" ^ e1_string ^ ",\n" ^ e2_string ^ end_paren_string
 
 
     | _ -> failwith "unimplemented"
