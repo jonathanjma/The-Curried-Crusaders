@@ -36,6 +36,9 @@ rule read =
   | "curry" {CURRY}
   | "let" {LET}
   | "in" {IN}
+  | "if" {IF}
+  | "then" {THEN}
+  | "else" {ELSE}
   | rcp { RCP (Lexing.lexeme lexbuf) }
   | cal { CAL (int_of_string (Lexing.lexeme lexbuf)) }
   | joul { JOUL (float_of_string (Lexing.lexeme lexbuf)) }

@@ -98,6 +98,13 @@ let rec pretty_print (e : expr) (level : int) : string =
       let end_paren_string : string = nl_l level ^ ")" in
       "FuncApp (\n" ^ e1_string ^ ",\n" ^ e2_string ^ end_paren_string
 
+    | Ternary (p, e1, e2) ->
+      let p_string : string = pretty_print p (level + 1) in
+      let e1_string : string = pretty_print e1 (level + 1) in
+      let e2_string : string = pretty_print e2 (level + 1) in
+      let end_paren_string : string = nl_l level ^ ")" in
+      "Ternary (\n" ^ p_string ^ ",\n" ^ e1_string ^ ",\n" ^ e2_string ^ ",\n" ^ end_paren_string
+
 
     | _ -> failwith "unimplemented"
   in

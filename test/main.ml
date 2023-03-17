@@ -35,13 +35,22 @@ let tests =
 
 let _ = run_test_tt_main ("suite" >::: tests);
 
-(*
+
 let tree: Ast.expr = parse "
 
-f f 1
+let f cook 
+
+if p 
+  then (curry n cook n + 1)
+else
+  (curry n cook n + 2)
+
+
+in
+
+f 1
 
 "
 in
    let str: string = pretty_print tree 0 in print_endline str
 
-*)

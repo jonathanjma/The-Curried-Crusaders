@@ -32,6 +32,10 @@ open Ast
 
 %token CURRY
 
+%token IF
+%token THEN
+%token ELSE
+
 (* lower precedence operators *)
 
 %left FORK
@@ -56,12 +60,16 @@ expr:
   | e1 = expr; TIMES; e2 = expr { Binop (Mult, e1, e2) }
   | LPAREN; e = expr; RPAREN { e }
   | l_e = let_expr { l_e }
+  | t = ternary_expr { t }
   ;
   
 
 let_expr:
   | LET; n = RCP; COOK; e1 = expr; IN; e2 = expr { LetExpression (n, e1, e2) }
   ;
+
+ternary_expr:
+  | IF; p = expr; THEN; e1 = expr; ELSE; e2 = expr {Ternary (p, e1, e2)}
 
 
 value:
