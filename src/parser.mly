@@ -30,6 +30,8 @@ open Ast
 %token COOK
 %token IN
 
+%token CURRY
+
 (* lower precedence operators *)
 
 %left FORK
@@ -46,6 +48,7 @@ prog:
   | e = expr; EOF { e }
   ;
 
+
 expr:
   | v = value { v }
   | e1 = expr; PLUS; e2 = expr { Binop (Add, e1, e2) }
@@ -54,20 +57,26 @@ expr:
   | LPAREN; e = expr; RPAREN { e }
   | l_e = let_expr { l_e }
   ;
-
+  
 
 let_expr:
   | LET; n = RCP; COOK; e1 = expr; IN; e2 = expr { LetExpression (n, e1, e2) }
   ;
 
+
 value:
   | i = CAL { Cal i }
   | f = JOUL { Joul f }
   | DOUBLE_QUOTE; s = RCP; DOUBLE_QUOTE { Rcp s }
+  | iden = RCP; {Identifier iden}
   | c = ING { Ing c }
   | b = BOOL { Bool b }
   | PIE { Joul Float.pi }
   | TRUE { Bool true }
   | FALSE { Bool false }
   | LBRAC; l = BOWL; RBRAC { Bowl l }
+  | f = function_value {f}
+  ;
+function_value:
+  | CURRY; a = RCP; COOK; e = expr {Function (a, e)}
   ;

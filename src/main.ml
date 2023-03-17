@@ -66,6 +66,10 @@ let rec pretty_print (e : expr) (level : int) : string =
     | Joul a ->
         let joul_string : string = a |> string_of_float in
         "Joul (" ^ joul_string ^ ")"
+
+    | Identifier a ->
+      let identifier_string : string = a in
+      "Id (" ^ identifier_string ^ ")"
     | Binop (bop, e1, e2) ->
         let bop_string : string = bop_to_string bop in
         let pp_e1 : string = pretty_print e1 (level + 1) in
@@ -81,6 +85,14 @@ let rec pretty_print (e : expr) (level : int) : string =
 
         "Let (" ^ name_string ^ "," ^ e1_string ^ "," ^ e2_string
         ^ end_paren_string
+
+    | Function (n, e) ->
+      let arg_string: string = nl_l (level + 1) ^ n in
+      let body_string: string = pretty_print e (level + 1) in
+      let end_paren_string : string = nl_l level ^ ")" in
+      "Func (" ^ arg_string ^ "," ^ body_string ^ "," ^ end_paren_string
+
+
     | _ -> failwith "unimplemented"
   in
 

@@ -33,6 +33,7 @@ rule read =
   | "," { COMMA }
   | "PIE" { PIE }
   | "cook" {COOK}
+  | "curry" {CURRY}
   | "let" {LET}
   | "in" {IN}
   | rcp { RCP (Lexing.lexeme lexbuf) }

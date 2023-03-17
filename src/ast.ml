@@ -20,3 +20,7 @@ type expr =
   | Bowl of expr list
   | Binop of bop * expr * expr
   | LetExpression of string * expr * expr
+  | Function of string * expr
+  | Identifier of string
+  (* string is the parameter*)
+  (* expr is the body of the function *)

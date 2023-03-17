@@ -33,7 +33,9 @@ let tests =
     parse_string_expression_test "" "2a31" "1 + 1 + \"a\" + 3 + 1";
   ]
 
-let _ = run_test_tt_main ("suite" >::: tests)
+let _ = run_test_tt_main ("suite" >::: tests);
 
-(* let tree: Ast.expr = parse "let aa cook 1 + 1 in let bb cook 2 + 2 in 3" in
-   let str: string = pretty_print tree 0 in print_endline str *)
+(*
+let tree: Ast.expr = parse "let f cook (curry n cook n + 1) in 1" in
+   let str: string = pretty_print tree 0 in print_endline str
+*)
