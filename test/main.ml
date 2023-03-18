@@ -18,6 +18,7 @@ let tests =
   [
     parse_int_expression_test "0 should parse to 0" 0 "0";
     parse_int_expression_test "6 should parse to 6" 6 "6";
+    parse_int_expression_test "-4 should parse to -4" ~-4 "-4";
     parse_int_expression_test "2+3 should parse to 5" 5 "2+3";
     parse_int_expression_test "5 fk 9 should parse to 12" 12 "5 fk 9";
     parse_int_expression_test "2 + 3 * 10 should parse to 32" 32 "2+3*10";
@@ -25,6 +26,7 @@ let tests =
     parse_int_expression_test "2 * (10 + 2) should parse to 24" 24
       "2 * (10 + 2)";
     parse_float_expression_test "2.0 should parse to 2.0" 2.0 "2.0";
+    parse_float_expression_test "-7.0 should parse to 2.0" ~-.7.0 "-7.0";
     parse_float_expression_test "PIE should parse to 3.141..." Float.pi "PIE";
     parse_string_expression_test "\"a\" should parse to a" "a" "\"a\"";
     parse_string_expression_test "\"abcde\" + \"a\" should parse to abcdea"
