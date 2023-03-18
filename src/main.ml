@@ -53,66 +53,80 @@ let nl_l (level : int) : string = "\n" ^ String.make level ' '
 
 
 
+let pretty_print_value (label: string) (f: 'a -> string) (value: 'a):  string =
+  let string_representation : string = f value in
+  label ^ " (" ^ string_representation ^ ")"
+
+
+
+
+
 let rec pretty_print (e : expr) (level : int) : string =
   (* first, print the indentations *)
   let indentations : string = String.make (level * 2) ' ' in
 
   let rest : string =
     match e with
-    | Cal a ->
-        let cal_string : string = a |> string_of_int in
-        "Cal (" ^ cal_string ^ ")"
-    | Rcp a ->
-        let rcp_string : string = a in
-        "Rcp (" ^ rcp_string ^ ")"
-    | Joul a ->
-        let joul_string : string = a |> string_of_float in
-        "Joul (" ^ joul_string ^ ")"
+    | Cal a -> pretty_print_value "Cal" string_of_int a
+    | Rcp a -> pretty_print_value "Rcp" (fun x -> x) a
+    | Joul a -> pretty_print_value "Joul" string_of_float a
+    | Bool a -> pretty_print_value "Bool" string_of_bool a
 
-    | Bool a ->
-      let bool_string : string = a |> string_of_bool in
-      "Bool (" ^ bool_string ^ ")"
+    | Identifier a -> pretty_print_value "Id" (fun x -> x) a
 
-    | Identifier a ->
-      let identifier_string : string = a in
-      "Id (" ^ identifier_string ^ ")"
-    | Binop (bop, e1, e2) ->
-        let bop_string : string = bop_to_string bop in
+    | Binop (bop, e1, e2) -> pretty_print_binop bop e1 e2 level
+        
+    | LetExpression (name, e1, e2) -> pretty_print_let name e1 e2 level
+        
+
+    | Function (n, e) -> pretty_print_function n e level
+      
+
+    | FunctionApp (e1, e2) -> pretty_print_function_app e1 e2 level
+
+    | Ternary (p, e1, e2) -> pretty_print_ternary p e1 e2 level
+      
+    | _ -> failwith "unimplemented"
+  in
+
+  indentations ^ rest
+
+
+and pretty_print_binop (bop: bop) (e1: expr) (e2: expr) (level: int) : string = 
+  let bop_string : string = bop_to_string bop in
         let pp_e1 : string = pretty_print e1 (level + 1) in
         let pp_e2 : string = pretty_print e2 (level + 1) in
         "Binop ("
         ^ nl_l (level + 2)
         ^ bop_string ^ ",\n" ^ pp_e1 ^ ",\n" ^ pp_e2 ^ nl_l level ^ ")"
-    | LetExpression (name, e1, e2) ->
-        let name_string : string = nl_l (level + 2) ^ name in
+
+
+and pretty_print_let (name: string) (e1: expr) (e2: expr) (level : int) : string =
+  let name_string : string = nl_l (level + 2) ^ name in
+          let e1_string : string = pretty_print e1 (level + 1) in
+          let e2_string : string = pretty_print e2 (level + 1) in
+          let end_paren_string : string = nl_l level ^ ")" in
+
+          "Let (" ^ name_string ^ ",\n" ^ e1_string ^ ",\n" ^ e2_string
+          ^ end_paren_string
+
+
+and pretty_print_function (n: string) (e: expr) (level: int) : string =
+  let arg_string: string = nl_l (level + 1) ^ n in
+        let body_string: string = pretty_print e (level + 1) in
+        let end_paren_string : string = nl_l level ^ ")" in
+        "Func (" ^ arg_string ^ ",\n" ^ body_string ^ "," ^ end_paren_string
+
+
+and pretty_print_function_app (e1: expr) (e2: expr) (level: int) : string = 
+  let e1_string : string = pretty_print e1 (level + 1) in
+        let e2_string : string = pretty_print e2 (level + 1) in
+        let end_paren_string : string = nl_l level ^ ")" in
+        "FuncApp (\n" ^ e1_string ^ ",\n" ^ e2_string ^ end_paren_string
+
+and pretty_print_ternary (p: expr) (e1: expr) (e2: expr) (level: int) = 
+  let p_string : string = pretty_print p (level + 1) in
         let e1_string : string = pretty_print e1 (level + 1) in
         let e2_string : string = pretty_print e2 (level + 1) in
         let end_paren_string : string = nl_l level ^ ")" in
-
-        "Let (" ^ name_string ^ ",\n" ^ e1_string ^ ",\n" ^ e2_string
-        ^ end_paren_string
-
-    | Function (n, e) ->
-      let arg_string: string = nl_l (level + 1) ^ n in
-      let body_string: string = pretty_print e (level + 1) in
-      let end_paren_string : string = nl_l level ^ ")" in
-      "Func (" ^ arg_string ^ ",\n" ^ body_string ^ "," ^ end_paren_string
-
-    | FunctionApp (e1, e2) ->
-      let e1_string : string = pretty_print e1 (level + 1) in
-      let e2_string : string = pretty_print e2 (level + 1) in
-      let end_paren_string : string = nl_l level ^ ")" in
-      "FuncApp (\n" ^ e1_string ^ ",\n" ^ e2_string ^ end_paren_string
-
-    | Ternary (p, e1, e2) ->
-      let p_string : string = pretty_print p (level + 1) in
-      let e1_string : string = pretty_print e1 (level + 1) in
-      let e2_string : string = pretty_print e2 (level + 1) in
-      let end_paren_string : string = nl_l level ^ ")" in
-      "Ternary (\n" ^ p_string ^ ",\n" ^ e1_string ^ ",\n" ^ e2_string ^ "" ^ end_paren_string
-
-
-    | _ -> failwith "unimplemented"
-  in
-
-  indentations ^ rest
+        "Ternary (\n" ^ p_string ^ ",\n" ^ e1_string ^ ",\n" ^ e2_string ^ "" ^ end_paren_string
