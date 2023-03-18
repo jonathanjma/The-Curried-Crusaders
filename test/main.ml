@@ -38,10 +38,7 @@ let _ = run_test_tt_main ("suite" >::: tests);
 
 let tree: Ast.expr = parse "
 
-let f cook curry n cook n + 1 in
-let g cook curry n cook n + 2 in
-
-f g 1
+curry n cook 1
 
 
 
