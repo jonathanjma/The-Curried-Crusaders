@@ -69,6 +69,10 @@ let rec pretty_print (e : expr) (level : int) : string =
         let joul_string : string = a |> string_of_float in
         "Joul (" ^ joul_string ^ ")"
 
+    | Bool a ->
+      let bool_string : string = a |> string_of_bool in
+      "Bool (" ^ bool_string ^ ")"
+
     | Identifier a ->
       let identifier_string : string = a in
       "Id (" ^ identifier_string ^ ")"
