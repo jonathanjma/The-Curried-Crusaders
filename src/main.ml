@@ -51,6 +51,8 @@ let rec eval (e : expr) : expr = if is_value e then e else e |> step |> eval
 let interp (s : string) : string = s |> parse |> eval |> string_of_val
 let nl_l (level : int) : string = "\n" ^ String.make level ' '
 
+
+
 let rec pretty_print (e : expr) (level : int) : string =
   (* first, print the indentations *)
   let indentations : string = String.make (level * 2) ' ' in
@@ -75,15 +77,15 @@ let rec pretty_print (e : expr) (level : int) : string =
         let pp_e1 : string = pretty_print e1 (level + 1) in
         let pp_e2 : string = pretty_print e2 (level + 1) in
         "Binop ("
-        ^ nl_l (level + 1)
+        ^ nl_l (level + 2)
         ^ bop_string ^ ",\n" ^ pp_e1 ^ ",\n" ^ pp_e2 ^ nl_l level ^ ")"
     | LetExpression (name, e1, e2) ->
-        let name_string : string = nl_l (level + 1) ^ name in
+        let name_string : string = nl_l (level + 2) ^ name in
         let e1_string : string = pretty_print e1 (level + 1) in
         let e2_string : string = pretty_print e2 (level + 1) in
         let end_paren_string : string = nl_l level ^ ")" in
 
-        "Let (" ^ name_string ^ ",\n" ^ e1_string ^ "," ^ e2_string
+        "Let (" ^ name_string ^ ",\n" ^ e1_string ^ ",\n" ^ e2_string
         ^ end_paren_string
 
     | Function (n, e) ->
@@ -103,7 +105,7 @@ let rec pretty_print (e : expr) (level : int) : string =
       let e1_string : string = pretty_print e1 (level + 1) in
       let e2_string : string = pretty_print e2 (level + 1) in
       let end_paren_string : string = nl_l level ^ ")" in
-      "Ternary (\n" ^ p_string ^ ",\n" ^ e1_string ^ ",\n" ^ e2_string ^ ",\n" ^ end_paren_string
+      "Ternary (\n" ^ p_string ^ ",\n" ^ e1_string ^ ",\n" ^ e2_string ^ "" ^ end_paren_string
 
 
     | _ -> failwith "unimplemented"

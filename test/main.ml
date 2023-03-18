@@ -38,17 +38,7 @@ let _ = run_test_tt_main ("suite" >::: tests);
 
 let tree: Ast.expr = parse "
 
-let f cook 
-
-if p 
-  then (curry n cook n + 1)
-else
-  (curry n cook n + 2)
-
-
-in
-
-f 1
+true
 
 "
 in
