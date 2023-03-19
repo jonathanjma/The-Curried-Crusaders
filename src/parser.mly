@@ -8,7 +8,6 @@ open Ast
 
 %token <string> NAME
 
-%token <char> ING
 %token <bool> BOOL
 %token TRUE
 %token FALSE
@@ -53,6 +52,7 @@ prog:
   | e = expr; EOF { e }
   ;
 
+
 expr:
   | v = value { v }
   | e1 = expr; PLUS; e2 = expr { Binop (Add, e1, e2) }
@@ -62,39 +62,35 @@ expr:
   | l_e = let_expr { l_e }
   | t = ternary_expr { t }
   ;
+  
 
 let_expr:
   | LET; n = RCP; COOK; e1 = expr; IN; e2 = expr { LetExpression (n, e1, e2) }
   ;
 
 ternary_expr:
-  | IF; p = expr; THEN; e1 = expr; ELSE; e2 = expr { Ternary (p, e1, e2) }
+  | IF; p = expr; THEN; e1 = expr; ELSE; e2 = expr {Ternary (p, e1, e2)}
   ;
+
 
 value:
   | i = CAL { Cal i }
   | f = JOUL { Joul f }
-  | SINGLE_QUOTE; c = ING; SINGLE_QUOTE { Ing c }
+  | SINGLE_QUOTE; c = RCP; SINGLE_QUOTE {Ing c}
   | DOUBLE_QUOTE; s = RCP; DOUBLE_QUOTE { Rcp s }
-  | iden = RCP; { Identifier iden }
+  | iden = RCP; {Identifier iden}
   | b = BOOL { Bool b }
   | PIE { Joul Float.pi }
   | TRUE { Bool true }
   | FALSE { Bool false }
-  | f = function_value { f }
-  | a = function_app { a }
-  | LBRAC; lst = BOWL; RBRAC { Bowl lst } (* hmm 'lst' isn't an 'expr list', it is a 'string' *)
+  | LBRAC; l = BOWL; RBRAC { Bowl l }
+  | f = function_value {f}
+  | a = function_app {a}
   ;
-
-lst_value:
-  | e = expr; COMMA { expr e }
-  | e = expr; { expr e }
-  ;
-
 function_value:
-  | CURRY; a = RCP; COOK; e = expr { Function (a, e) }
+  | CURRY; a = RCP; COOK; e = expr {Function (a, e)}
   ;
 
 function_app:
-  | e1 = expr; e2 = expr { FunctionApp (e1, e2) }
-  ;
+  | e1 = expr; e2 = expr {FunctionApp (e1, e2)}
+;

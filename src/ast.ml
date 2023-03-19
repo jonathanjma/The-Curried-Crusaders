@@ -15,7 +15,7 @@ type expr =
   | Cal of int
   | Joul of float
   | Rcp of string
-  | Ing of char
+  | Ing of string
   | Bool of bool
   | Bowl of expr list
   | Binop of bop * expr * expr
