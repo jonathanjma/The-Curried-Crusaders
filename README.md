@@ -2,6 +2,9 @@
 
 ## OCaml Project Team sponsored by camels 🐫
 
+### How to install and run the project:
+See [INSTALL.md](documentation/INSTALL.md)
+
 ### Members:
 
 - Zachary Seidner (zes4)
