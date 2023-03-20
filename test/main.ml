@@ -14,7 +14,13 @@ let eval_string_expression_test name expected_output string_expression =
   name >:: fun _ ->
   assert_equal expected_output (interp string_expression) ~printer:id
 
-let tests =
+
+
+let parse_test (name: string) (input: string) (expected_output: Ast.expr) =
+  name >:: fun _ ->
+    assert_equal (parse input) expected_output
+
+let parse_tests =
   [
     eval_int_expression_test "0 should parse to 0" 0 "0";
     eval_int_expression_test "6 should parse to 6" 6 "6";
@@ -37,8 +43,9 @@ let tests =
     eval_string_expression_test "" "2a31" "1 + 1 + \"a\" + 3 + 1";
 ]
 
-let _ = run_test_tt_main ("suite" >::: tests);
+let parse_tests = [
+  parse_test "the number 1" "1" (Cal 1)
+]
 
-let tree = parse "\"\"" in
-let str: string = pretty_print tree 0 in
-print_endline str
+let () = run_test_tt_main ("suite" >::: parse_tests);
+run_test_tt_main ("parse tests" >::: parse_tests);
