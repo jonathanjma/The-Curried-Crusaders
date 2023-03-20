@@ -55,6 +55,13 @@ let parse_int_tests = [
   parse_test "parse -1" "-1" (Cal (-1));
   parse_test "parse -99999" "-99999" (Cal (-99999));
 ]
+
+let parse_bool_tests = [
+  parse_test "parse true" "true" (Bool true);
+  parse_test "parse false" "false" (Bool false);
+]
+
+
 let parse_tests = List.flatten [ parse_int_tests ]
 let tests = List.flatten [ eval_tests; parse_tests ]
 let () = run_test_tt_main ("suite" >::: tests)
