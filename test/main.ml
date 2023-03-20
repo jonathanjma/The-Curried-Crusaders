@@ -35,8 +35,10 @@ let tests =
       "abcdea" "\"abcde\" + \"a\"";
     eval_string_expression_test "\"a\" + 1 should parse to a1" "a1" "\"a\" + 1";
     eval_string_expression_test "" "2a31" "1 + 1 + \"a\" + 3 + 1";
-  ]
+]
 
 let _ = run_test_tt_main ("suite" >::: tests);
 
-eval (parse "\"a\"") |> string_of_val |> print_endline
+let tree = parse "\"\"" in
+let str: string = pretty_print tree 0 in
+print_endline str
