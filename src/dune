@@ -1,5 +1,6 @@
 (library
- (name interp))
+ (name interp)
+ (public_name Interp))
 
 (menhir
  (modules parser))
