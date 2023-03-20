@@ -17,7 +17,7 @@ let rec take_commands () =
             print_endline "";
             take_commands ()
         | x ->
-            print_string x;
+            print_endline x;
             print_endline "";
             take_commands ())
 
@@ -33,7 +33,7 @@ and ustring_commands = function
       take_commands ()
 
 let main () =
-  ANSITerminal.print_string [ ANSITerminal.red ] "\n\nWelcome to ustove!\n";
+  print_endline "\n\nWelcome to ustove!";
   print_endline "Type #ustove_help for help about using ustove.";
   print_endline "Please enter a command.";
   take_commands ()
