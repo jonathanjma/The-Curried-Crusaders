@@ -48,7 +48,13 @@ let eval_string_tests =
 let eval_tests =
   List.flatten [ eval_int_tests; eval_float_tests; eval_string_tests ]
 
-let parse_int_tests = [ parse_test "parse 1" "1" (Cal 1) ]
+let parse_int_tests = [ 
+  parse_test "parse 1" "1" (Cal 1);
+  parse_test "parse 0" "0" (Cal 0);
+  parse_test "parse 12345" "12345" (Cal 12345);
+  parse_test "parse -1" "-1" (Cal (-1));
+  parse_test "parse -99999" "-99999" (Cal (-99999));
+]
 let parse_tests = List.flatten [ parse_int_tests ]
 let tests = List.flatten [ eval_tests; parse_tests ]
 let () = run_test_tt_main ("suite" >::: tests)
