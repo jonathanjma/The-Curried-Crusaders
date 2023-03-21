@@ -65,8 +65,7 @@ let rec eval (e : expr) : expr = if is_value e then e else e |> step |> eval
 let interp (s : string) : string = s |> parse |> eval |> string_of_val
 let nl_l (level : int) : string = "\n" ^ String.make level ' '
 
-let pretty_print_value (label : string) (f : 'a -> string) (value : 'a) : string
-    =
+let pretty_print_value (label : string) (f : 'a -> string) (value : 'a) : string =
   let string_representation : string = f value in
   label ^ " (" ^ string_representation ^ ")"
 
@@ -80,6 +79,7 @@ let rec pretty_print (e : expr) (level : int) : string =
     | Rcp a -> pretty_print_value "Rcp" (fun x -> x) a
     | Joul a -> pretty_print_value "Joul" string_of_float a
     | Bool a -> pretty_print_value "Bool" string_of_bool a
+    | Ing a -> pretty_print_value "Ing" (fun x -> x) a
     | Identifier a -> pretty_print_value "Id" (fun x -> x) a
     | Binop (bop, e1, e2) -> pretty_print_binop bop e1 e2 level
     | LetExpression (name, e1, e2) -> pretty_print_let name e1 e2 level
@@ -130,3 +130,4 @@ and pretty_print_ternary (p : expr) (e1 : expr) (e2 : expr) (level : int) =
   let end_paren_string : string = nl_l (level + 1) ^ ")" in
   "Ternary (\n" ^ p_string ^ ",\n" ^ e1_string ^ ",\n" ^ e2_string ^ ""
   ^ end_paren_string
+

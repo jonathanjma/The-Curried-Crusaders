@@ -14,8 +14,6 @@ let joul ='-'? digit+ '.' digit+
 let ing = letter+
 let rcp = letter+
 
-(* let list_elements = [^',''\n']+ *)
-
 rule read =
   parse 
   | white { read lexbuf }
@@ -43,7 +41,6 @@ rule read =
   (*| ing { ING (String.get (Lexing.lexeme lexbuf) 0) }*) (* idk why char doesn't work... *)
   | cal { CAL (int_of_string (Lexing.lexeme lexbuf)) }
   | joul { JOUL (float_of_string (Lexing.lexeme lexbuf)) }
-  (* | list_elements { BOWL (Lexing.lexeme lexbuf) } *)
   | eof { EOF }
   | _ { raise (SyntaxError ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
 and read_string buf =
