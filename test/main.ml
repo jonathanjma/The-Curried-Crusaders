@@ -94,7 +94,21 @@ let parse_char_tests = [
   parse_test "parse '_'" "'_'" (Ing "_");
 ]
 
+let one_plus_one: Ast.expr = Ast.Binop (Ast.Add, Ast.Cal 1, Ast.Cal 1)
+let one_plus_one_plus_one: Ast.expr = Ast.Binop (Ast.Add, one_plus_one, Ast.Cal 1)
 
-let parse_tests = List.flatten [ parse_int_tests; parse_bool_tests; parse_float_tests; parse_id_tests; parse_char_tests]
+let two_times_five: Ast.expr = Ast.Binop (Ast.Mult, Cal 2, Cal 5)
+let two_times_five_plus_one: Ast.expr = Ast.Binop(Ast.Add, two_times_five, Cal 1)
+let two_times_five_plus_one_plus_one_hundred: Ast.expr = Ast.Binop(Ast.Add, two_times_five_plus_one, Cal 100)
+
+let parse_bop_tests = [
+  parse_test "parse 1 + 1" "1 + 1" one_plus_one;
+  parse_test "parse 1 + 1 + 1" "1 + 1 + 1" one_plus_one_plus_one;
+  parse_test "parse 2 * 5" "2 * 5" two_times_five;
+  parse_test "parse 2 * 5 + 1" "2 * 5 + 1" two_times_five_plus_one;
+  parse_test "parse 2 * 5 + 1 + 100" "2 * 5 + 1 + 100" two_times_five_plus_one_plus_one_hundred;
+]
+
+let parse_tests = List.flatten [ parse_int_tests; parse_bool_tests; parse_float_tests; parse_id_tests; parse_char_tests; parse_bop_tests]
 let tests = List.flatten [ eval_tests; parse_tests; ]
 let () = run_test_tt_main ("suite" >::: tests)
