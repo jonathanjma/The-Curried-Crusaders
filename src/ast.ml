@@ -15,7 +15,7 @@ type expr =
   | Cal of int
   | Joul of float
   | Rcp of string
-  | Ing of char
+  | Ing of string
   | Bool of bool
   | Bowl of expr list
   | Binop of bop * expr * expr
@@ -24,5 +24,5 @@ type expr =
   | Identifier of string
   | FunctionApp of expr * expr
   | Ternary of expr * expr * expr
-  (* string is the parameter*)
-  (* expr is the body of the function *)
+(* string is the parameter*)
+(* expr is the body of the function *)

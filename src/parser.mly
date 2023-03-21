@@ -4,9 +4,8 @@ open Ast
 
 %token <int> CAL
 %token <float> JOUL
+%token <string> ID
 %token <string> RCP
-
-%token <string> NAME
 
 %token <char> ING
 %token <bool> BOOL
@@ -64,19 +63,20 @@ expr:
   ;
 
 let_expr:
-  | LET; n = RCP; COOK; e1 = expr; IN; e2 = expr { LetExpression (n, e1, e2) }
+  | LET; n = ID; COOK; e1 = expr; IN; e2 = expr { LetExpression (n, e1, e2) }
   ;
 
 ternary_expr:
   | IF; p = expr; THEN; e1 = expr; ELSE; e2 = expr { Ternary (p, e1, e2) }
   ;
-
 value:
   | i = CAL { Cal i }
   | f = JOUL { Joul f }
-  | SINGLE_QUOTE; c = ING; SINGLE_QUOTE { Ing c }
-  | DOUBLE_QUOTE; s = RCP; DOUBLE_QUOTE { Rcp s }
-  | iden = RCP; { Identifier iden }
+  | c = RCP { Rcp c }
+  // | s = Ing { Ing s }
+  // | SINGLE_QUOTE; c = ING; SINGLE_QUOTE { Ing c }
+  // | DOUBLE_QUOTE; s = RCP; DOUBLE_QUOTE { Rcp s }
+  | iden = ID; { Identifier iden }
   | b = BOOL { Bool b }
   | PIE { Joul Float.pi }
   | TRUE { Bool true }
@@ -92,7 +92,7 @@ lst_value:
   ;
 
 function_value:
-  | CURRY; a = RCP; COOK; e = expr { Function (a, e) }
+  | CURRY; a = ID; COOK; e = expr { Function (a, e) }
   ;
 
 function_app:
