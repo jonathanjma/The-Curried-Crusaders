@@ -77,7 +77,14 @@ let parse_float_tests = [
 
 ]
 
+let parse_id_tests = [
+  parse_test "parse n" "n" (Identifier "n");
+  parse_test "parse x" "x" (Identifier "x");
+  parse_test "parse func" "func" (Identifier "func");
+  parse_test "parse this_is_an_identifier" "this_is_an_identifier" (Identifier "this_is_an_identifier");
+]
 
-let parse_tests = List.flatten [ parse_int_tests; parse_bool_tests; parse_float_tests]
+
+let parse_tests = List.flatten [ parse_int_tests; parse_bool_tests; parse_float_tests; parse_id_tests]
 let tests = List.flatten [ eval_tests; parse_tests; ]
 let () = run_test_tt_main ("suite" >::: tests)

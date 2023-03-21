@@ -6,7 +6,7 @@ exception SyntaxError of string
 
 let white = [' ' '\t' '\n']+
 let digit = ['0'-'9']
-let letter = ['a'-'z' 'A'-'Z']
+let letter = ['a'-'z' 'A'-'Z' '_']
 
 let cal = '-'? digit+
 let joul ='-'? digit+ '.' digit+
