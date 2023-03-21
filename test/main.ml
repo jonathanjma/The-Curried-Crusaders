@@ -194,6 +194,29 @@ let parse_ternary_tests =
             Ternary (Identifier "c", Identifier "d", Identifier "e") ));
   ]
 
+let complex_parse_tests =
+  [
+    parse_test "let with function" "let inc cook curry n cook n + 1 in inc 1"
+      (Ast.LetExpression
+         ( "inc",
+           Function ("n", Binop (Add, Identifier "n", Cal 1)),
+           FunctionApp (Identifier "inc", Cal 1) ));
+    parse_test "three nested let expressions"
+      "\n\
+      \    \n\
+      \    let a cook 1 in\n\
+      \    let b cook 2 in\n\
+      \    let c cook 3 in\n\
+      \    4\n\
+      \  \n\
+      \    "
+      Ast.(
+        LetExpression
+          ( "a",
+            Cal 1,
+            LetExpression ("b", Cal 2, LetExpression ("c", Cal 3, Cal 4)) ));
+  ]
+
 let parse_tests =
   List.flatten
     [
@@ -207,6 +230,7 @@ let parse_tests =
       parse_function_tests;
       parse_function_app_tests;
       parse_ternary_tests;
+      complex_parse_tests;
     ]
 
 let tests = List.flatten [ eval_tests; parse_tests ]
