@@ -172,6 +172,28 @@ let parse_function_app_tests =
           (Identifier "f", FunctionApp (Identifier "f", Identifier "f")));
   ]
 
+let parse_ternary_tests =
+  [
+    parse_test "parse if e_one then e_two else e_three"
+      "if e_one then e_two else e_three"
+      Ast.(
+        Ternary (Identifier "e_one", Identifier "e_two", Identifier "e_three"));
+    parse_test "nested expression"
+      "\n\
+      \    \n\
+      \    if a then b\n\
+      \    else if c then d\n\
+      \    else e\n\
+      \    \n\
+      \    \n\
+      \    "
+      Ast.(
+        Ternary
+          ( Identifier "a",
+            Identifier "b",
+            Ternary (Identifier "c", Identifier "d", Identifier "e") ));
+  ]
+
 let parse_tests =
   List.flatten
     [
@@ -184,6 +206,7 @@ let parse_tests =
       parse_let_tests;
       parse_function_tests;
       parse_function_app_tests;
+      parse_ternary_tests;
     ]
 
 let tests = List.flatten [ eval_tests; parse_tests ]
