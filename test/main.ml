@@ -48,122 +48,130 @@ let eval_string_tests =
 let eval_tests =
   List.flatten [ eval_int_tests; eval_float_tests; eval_string_tests ]
 
-let parse_int_tests = [ 
-  parse_test "parse 1" "1" (Cal 1);
-  parse_test "parse 0" "0" (Cal 0);
-  parse_test "parse 12345" "12345" (Cal 12345);
-  parse_test "parse -1" "-1" (Cal (-1));
-  parse_test "parse -99999" "-99999" (Cal (-99999));
-]
+let parse_int_tests =
+  [
+    parse_test "parse 1" "1" (Cal 1);
+    parse_test "parse 0" "0" (Cal 0);
+    parse_test "parse 12345" "12345" (Cal 12345);
+    parse_test "parse -1" "-1" (Cal (-1));
+    parse_test "parse -99999" "-99999" (Cal (-99999));
+  ]
 
-let parse_bool_tests = [
-  parse_test "parse true" "true" (Bool true);
-  parse_test "parse false" "false" (Bool false);
-]
+let parse_bool_tests =
+  [
+    parse_test "parse true" "true" (Bool true);
+    parse_test "parse false" "false" (Bool false);
+  ]
 
-let parse_string_tests = [
-  parse_test "parse \"test\"" "\"test\"" (Rcp "test");
-  parse_test "parse \"\"" "\"\"" (Rcp ""); (* FAILING *)
-  parse_test "parse \"a a\"" "\"a a\"" (Rcp "a a"); (* FAILING *)
-  parse_test "parse \"this is a test\"" "\"this is a test\"" (Rcp "this is a test"); (* FAILING *)
-  parse_test "parse \" \"" "\" \"" (Rcp " "); (* FAILING *)
-]
+let parse_string_tests =
+  [
+    parse_test "parse \"test\"" "\"test\"" (Rcp "test");
+    parse_test "parse \"\"" "\"\"" (Rcp "");
+    (* FAILING *)
+    parse_test "parse \"a a\"" "\"a a\"" (Rcp "a a");
+    (* FAILING *)
+    parse_test "parse \"this is a test\"" "\"this is a test\""
+      (Rcp "this is a test");
+    (* FAILING *)
+    parse_test "parse \" \"" "\" \"" (Rcp " ");
+    (* FAILING *)
+  ]
 
-let parse_float_tests = [
-  parse_test "parse 1.1" "1.1" (Joul 1.1);
-  parse_test "parse 0.0" "0.0" (Joul 0.0);
-  parse_test "parse 100.001" "100.001" (Joul 100.001);
-  parse_test "parse 12345.12345" "12345.12345" (Joul 12345.12345);
+let parse_float_tests =
+  [
+    parse_test "parse 1.1" "1.1" (Joul 1.1);
+    parse_test "parse 0.0" "0.0" (Joul 0.0);
+    parse_test "parse 100.001" "100.001" (Joul 100.001);
+    parse_test "parse 12345.12345" "12345.12345" (Joul 12345.12345);
+  ]
 
-]
+let parse_id_tests =
+  [
+    parse_test "parse n" "n" (Identifier "n");
+    parse_test "parse x" "x" (Identifier "x");
+    parse_test "parse func" "func" (Identifier "func");
+    parse_test "parse this_is_an_identifier" "this_is_an_identifier"
+      (Identifier "this_is_an_identifier");
+  ]
 
-let parse_id_tests = [
-  parse_test "parse n" "n" (Identifier "n");
-  parse_test "parse x" "x" (Identifier "x");
-  parse_test "parse func" "func" (Identifier "func");
-  parse_test "parse this_is_an_identifier" "this_is_an_identifier" (Identifier "this_is_an_identifier");
-]
+let parse_char_tests =
+  [
+    parse_test "parse 'a'" "'a'" (Ing "a");
+    parse_test "parse 'b'" "'b'" (Ing "b");
+    parse_test "parse 'c'" "'c'" (Ing "c");
+    parse_test "parse 'd'" "'d'" (Ing "d");
+    parse_test "parse 'testing'" "'testing'" (Ing "testing");
+    (* technically, this is not a valid string but it should still parse *)
+    parse_test "parse '_'" "'_'" (Ing "_");
+  ]
 
-let parse_char_tests = [
-  parse_test "parse 'a'" "'a'" (Ing "a");
-  parse_test "parse 'b'" "'b'" (Ing "b");
-  parse_test "parse 'c'" "'c'" (Ing "c");
-  parse_test "parse 'd'" "'d'" (Ing "d");
-  parse_test "parse 'testing'" "'testing'" (Ing "testing"); 
-  (* technically, this is not a valid string but it should still parse *)
-  parse_test "parse '_'" "'_'" (Ing "_");
-]
+let one_plus_one : Ast.expr = Ast.Binop (Ast.Add, Ast.Cal 1, Ast.Cal 1)
 
-let one_plus_one: Ast.expr = Ast.Binop (Ast.Add, Ast.Cal 1, Ast.Cal 1)
-let one_plus_one_plus_one: Ast.expr = Ast.Binop (Ast.Add, one_plus_one, Ast.Cal 1)
+let one_plus_one_plus_one : Ast.expr =
+  Ast.Binop (Ast.Add, one_plus_one, Ast.Cal 1)
 
-let two_times_five: Ast.expr = Ast.Binop (Ast.Mult, Cal 2, Cal 5)
-let two_times_five_plus_one: Ast.expr = Ast.Binop(Ast.Add, two_times_five, Cal 1)
-let two_times_five_plus_one_plus_one_hundred: Ast.expr = Ast.Binop(Ast.Add, two_times_five_plus_one, Cal 100)
+let two_times_five : Ast.expr = Ast.Binop (Ast.Mult, Cal 2, Cal 5)
 
+let two_times_five_plus_one : Ast.expr =
+  Ast.Binop (Ast.Add, two_times_five, Cal 1)
 
-let n: Ast.expr = Identifier "n"
-let one: Ast.expr = Cal 1
+let two_times_five_plus_one_plus_one_hundred : Ast.expr =
+  Ast.Binop (Ast.Add, two_times_five_plus_one, Cal 100)
 
-let n_plus_one: Ast.expr = Ast.(Binop (Add, n, one))
+let n : Ast.expr = Identifier "n"
+let one : Ast.expr = Cal 1
+let n_plus_one : Ast.expr = Ast.(Binop (Add, n, one))
 
+let parse_bop_tests =
+  [
+    parse_test "parse 1 + 1" "1 + 1" one_plus_one;
+    parse_test "parse 1 + 1 + 1" "1 + 1 + 1" one_plus_one_plus_one;
+    parse_test "parse 2 * 5" "2 * 5" two_times_five;
+    parse_test "parse 2 * 5 + 1" "2 * 5 + 1" two_times_five_plus_one;
+    parse_test "parse 2 * 5 + 1 + 100" "2 * 5 + 1 + 100"
+      two_times_five_plus_one_plus_one_hundred;
+  ]
 
+let parse_let_tests =
+  [
+    parse_test "parse let n cook 1 in n + 1" "let n cook 1 in n + 1"
+      (LetExpression ("n", one, n_plus_one));
+    parse_test "parse\n  \n  let n cook 1 in\n  let m cook n in\n  m + n\n  "
+      "\n  let n cook 1 in\n  let m cook n in\n  m + n\n  "
+      Ast.(
+        LetExpression
+          ( "n",
+            Cal 1,
+            LetExpression
+              ("m", Identifier "n", Binop (Add, Identifier "m", Identifier "n"))
+          ));
+    parse_test "parse\n  let a cook 100 in 1000\n  \n  "
+      "let a cook 100 in 1000"
+      Ast.(LetExpression ("a", Cal 100, Cal 1000));
+  ]
 
-let parse_bop_tests = [
-  parse_test "parse 1 + 1" "1 + 1" one_plus_one;
-  parse_test "parse 1 + 1 + 1" "1 + 1 + 1" one_plus_one_plus_one;
-  parse_test "parse 2 * 5" "2 * 5" two_times_five;
-  parse_test "parse 2 * 5 + 1" "2 * 5 + 1" two_times_five_plus_one;
-  parse_test "parse 2 * 5 + 1 + 100" "2 * 5 + 1 + 100" two_times_five_plus_one_plus_one_hundred;
-]
+let parse_function_tests =
+  [
+    parse_test "parse curry n cook n" "curry n cook n"
+      Ast.(Function ("n", Identifier "n"));
+    parse_test "parse curry n cook n + 1" "curry n cook n + 1"
+      Ast.(Function ("n", Binop (Add, Identifier "n", Cal 1)));
+    parse_test "parse curry argument cook true" "curry argument cook true"
+      Ast.(Function ("argument", Bool true));
+  ]
 
-let parse_let_tests = [
-  parse_test "parse let n cook 1 in n + 1" 
-  "let n cook 1 in n + 1" 
-  (LetExpression ("n", one, n_plus_one));
+let parse_tests =
+  List.flatten
+    [
+      parse_int_tests;
+      parse_bool_tests;
+      parse_float_tests;
+      parse_id_tests;
+      parse_char_tests;
+      parse_bop_tests;
+      parse_let_tests;
+      parse_function_tests;
+    ]
 
-  parse_test "parse
-  
-  let n cook 1 in
-  let m cook n in
-  m + n
-  "
-
-  "
-  let n cook 1 in
-  let m cook n in
-  m + n
-  "
-
-  (Ast.(
-    LetExpression (
-      "n",
-      Cal 1,
-      LetExpression (
-        "m",
-        Identifier "n",
-        Binop (Add, Identifier "m", Identifier "n")
-      )
-    )
-  ));
-
-  parse_test "parse
-  let a cook 100 in 1000
-  
-  "
-
-  "let a cook 100 in 1000"
-
-  (Ast.(
-    LetExpression (
-      "a",
-      Cal 100,
-      Cal 1000
-    )
-  ))
-
-]
-
-let parse_tests = List.flatten [ parse_int_tests; parse_bool_tests; parse_float_tests; parse_id_tests; parse_char_tests; parse_bop_tests; parse_let_tests]
-let tests = List.flatten [ eval_tests; parse_tests; ]
+let tests = List.flatten [ eval_tests; parse_tests ]
 let () = run_test_tt_main ("suite" >::: tests)
