@@ -84,7 +84,17 @@ let parse_id_tests = [
   parse_test "parse this_is_an_identifier" "this_is_an_identifier" (Identifier "this_is_an_identifier");
 ]
 
+let parse_char_tests = [
+  parse_test "parse 'a'" "'a'" (Ing "a");
+  parse_test "parse 'b'" "'b'" (Ing "b");
+  parse_test "parse 'c'" "'c'" (Ing "c");
+  parse_test "parse 'd'" "'d'" (Ing "d");
+  parse_test "parse 'testing'" "'testing'" (Ing "testing"); 
+  (* technically, this is not a valid string but it should still parse *)
+  parse_test "parse '_'" "'_'" (Ing "_");
+]
 
-let parse_tests = List.flatten [ parse_int_tests; parse_bool_tests; parse_float_tests; parse_id_tests]
+
+let parse_tests = List.flatten [ parse_int_tests; parse_bool_tests; parse_float_tests; parse_id_tests; parse_char_tests]
 let tests = List.flatten [ eval_tests; parse_tests; ]
 let () = run_test_tt_main ("suite" >::: tests)
