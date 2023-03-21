@@ -1,2 +1,5 @@
 _build
 .idea
+.vscode
+_coverage
+*.coverage

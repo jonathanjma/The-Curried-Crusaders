@@ -1,6 +1,8 @@
 (library
  (name interp)
- (public_name Interp))
+ (public_name Interp)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (menhir
  (modules parser))
