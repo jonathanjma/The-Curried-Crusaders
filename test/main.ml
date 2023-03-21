@@ -2,6 +2,12 @@ open OUnit2
 open Interp
 open Main
 
+(* Random tests are performance intensive, you may not want to run them every
+   time! *)
+let run_random_tests = true
+
+(* This number denotes how many of each type of random test to generate *)
+let number_of_random_tests = 5000
 let id x = x
 
 let eval_int_expression_test n eo i =
@@ -73,9 +79,35 @@ let parse_string_tests =
     parse_test "parse \"this is a test\"" "\"this is a test\""
       (Rcp "this is a test");
     (* FAILING *)
-    parse_test "parse \" \"" "\" \"" (Rcp " ");
-    (* FAILING *)
+    parse_test "parse \" \"" "\" \"" (Rcp " ") (* FAILING *);
   ]
+
+let random_parse_string_tests (tests : int) =
+  let make_rnd_str (length : int) =
+    let rec make_rnd_str (length : int) (acc : string) =
+      let rand_chr () =
+        if Random.int 8 = 5 then ' '
+        else if Random.int 5 = 1 then
+          Char.chr (97 + Random.int 26) |> Char.uppercase_ascii
+        else Char.chr (97 + Random.int 26)
+      in
+      if length = 0 then acc
+      else make_rnd_str (length - 1) (acc ^ String.make 1 (rand_chr ()))
+    in
+    make_rnd_str length ""
+  in
+
+  let rec random_parse_tests (tests : int) (acc : test list) =
+    let test_string = make_rnd_str (Random.int 20 + 40) in
+    if tests = 0 then acc
+    else
+      random_parse_tests (tests - 1)
+        (parse_test ("parse " ^ test_string)
+           ("\"" ^ test_string ^ "\"")
+           (Rcp test_string)
+        :: acc)
+  in
+  random_parse_tests tests []
 
 let parse_float_tests =
   [
@@ -92,17 +124,6 @@ let parse_id_tests =
     parse_test "parse func" "func" (Identifier "func");
     parse_test "parse this_is_an_identifier" "this_is_an_identifier"
       (Identifier "this_is_an_identifier");
-  ]
-
-let parse_char_tests =
-  [
-    parse_test "parse 'a'" "'a'" (Ing "a");
-    parse_test "parse 'b'" "'b'" (Ing "b");
-    parse_test "parse 'c'" "'c'" (Ing "c");
-    parse_test "parse 'd'" "'d'" (Ing "d");
-    parse_test "parse 'testing'" "'testing'" (Ing "testing");
-    (* technically, this is not a valid string but it should still parse *)
-    parse_test "parse '_'" "'_'" (Ing "_");
   ]
 
 let one_plus_one : Ast.expr = Ast.Binop (Ast.Add, Ast.Cal 1, Ast.Cal 1)
@@ -224,7 +245,6 @@ let parse_tests =
       parse_bool_tests;
       parse_float_tests;
       parse_id_tests;
-      parse_char_tests;
       parse_bop_tests;
       parse_let_tests;
       parse_function_tests;
@@ -233,5 +253,16 @@ let parse_tests =
       complex_parse_tests;
     ]
 
+let random_tests =
+  List.flatten [ random_parse_string_tests number_of_random_tests ]
+
 let tests = List.flatten [ eval_tests; parse_tests ]
-let () = run_test_tt_main ("suite" >::: tests)
+
+let () =
+  print_endline "\n\nRunning main test suite";
+  run_test_tt_main ("suite" >::: tests)
+
+let () =
+  if run_random_tests then (
+    print_endline "\nRunning random tests";
+    run_test_tt_main ("random suite" >::: random_tests))
