@@ -61,7 +61,15 @@ let parse_bool_tests = [
   parse_test "parse false" "false" (Bool false);
 ]
 
+let parse_string_tests = [
+  parse_test "parse \"test\"" "\"test\"" (Rcp "test");
+  parse_test "parse \"\"" "\"\"" (Rcp ""); (* FAILING *)
+  parse_test "parse \"a a\"" "\"a a\"" (Rcp "a a"); (* FAILING *)
+  parse_test "parse \"this is a test\"" "\"this is a test\"" (Rcp "this is a test"); (* FAILING *)
+  parse_test "parse \" \"" "\" \"" (Rcp " ") (* FAILING *)
+]
 
-let parse_tests = List.flatten [ parse_int_tests ]
-let tests = List.flatten [ eval_tests; parse_tests ]
+
+let parse_tests = List.flatten [ parse_int_tests; parse_bool_tests; ]
+let tests = List.flatten [ eval_tests; parse_tests; ]
 let () = run_test_tt_main ("suite" >::: tests)
