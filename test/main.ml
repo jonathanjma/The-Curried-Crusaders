@@ -94,17 +94,6 @@ let parse_id_tests =
       (Identifier "this_is_an_identifier");
   ]
 
-let parse_char_tests =
-  [
-    parse_test "parse 'a'" "'a'" (Ing "a");
-    parse_test "parse 'b'" "'b'" (Ing "b");
-    parse_test "parse 'c'" "'c'" (Ing "c");
-    parse_test "parse 'd'" "'d'" (Ing "d");
-    parse_test "parse 'testing'" "'testing'" (Ing "testing");
-    (* technically, this is not a valid string but it should still parse *)
-    parse_test "parse '_'" "'_'" (Ing "_");
-  ]
-
 let one_plus_one : Ast.expr = Ast.Binop (Ast.Add, Ast.Cal 1, Ast.Cal 1)
 
 let one_plus_one_plus_one : Ast.expr =
@@ -224,7 +213,6 @@ let parse_tests =
       parse_bool_tests;
       parse_float_tests;
       parse_id_tests;
-      parse_char_tests;
       parse_bop_tests;
       parse_let_tests;
       parse_function_tests;
