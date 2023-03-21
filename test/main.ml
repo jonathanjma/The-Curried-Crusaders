@@ -101,6 +101,14 @@ let two_times_five: Ast.expr = Ast.Binop (Ast.Mult, Cal 2, Cal 5)
 let two_times_five_plus_one: Ast.expr = Ast.Binop(Ast.Add, two_times_five, Cal 1)
 let two_times_five_plus_one_plus_one_hundred: Ast.expr = Ast.Binop(Ast.Add, two_times_five_plus_one, Cal 100)
 
+
+let n: Ast.expr = Identifier "n"
+let one: Ast.expr = Cal 1
+
+let n_plus_one: Ast.expr = Ast.(Binop (Add, n, one))
+
+
+
 let parse_bop_tests = [
   parse_test "parse 1 + 1" "1 + 1" one_plus_one;
   parse_test "parse 1 + 1 + 1" "1 + 1 + 1" one_plus_one_plus_one;
@@ -109,6 +117,53 @@ let parse_bop_tests = [
   parse_test "parse 2 * 5 + 1 + 100" "2 * 5 + 1 + 100" two_times_five_plus_one_plus_one_hundred;
 ]
 
-let parse_tests = List.flatten [ parse_int_tests; parse_bool_tests; parse_float_tests; parse_id_tests; parse_char_tests; parse_bop_tests]
+let parse_let_tests = [
+  parse_test "parse let n cook 1 in n + 1" 
+  "let n cook 1 in n + 1" 
+  (LetExpression ("n", one, n_plus_one));
+
+  parse_test "parse
+  
+  let n cook 1 in
+  let m cook n in
+  m + n
+  "
+
+  "
+  let n cook 1 in
+  let m cook n in
+  m + n
+  "
+
+  (Ast.(
+    LetExpression (
+      "n",
+      Cal 1,
+      LetExpression (
+        "m",
+        Identifier "n",
+        Binop (Add, Identifier "m", Identifier "n")
+      )
+    )
+  ));
+
+  parse_test "parse
+  let a cook 100 in 1000
+  
+  "
+
+  "let a cook 100 in 1000"
+
+  (Ast.(
+    LetExpression (
+      "a",
+      Cal 100,
+      Cal 1000
+    )
+  ))
+
+]
+
+let parse_tests = List.flatten [ parse_int_tests; parse_bool_tests; parse_float_tests; parse_id_tests; parse_char_tests; parse_bop_tests; parse_let_tests]
 let tests = List.flatten [ eval_tests; parse_tests; ]
 let () = run_test_tt_main ("suite" >::: tests)
