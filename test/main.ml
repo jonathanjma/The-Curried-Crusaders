@@ -160,6 +160,18 @@ let parse_function_tests =
       Ast.(Function ("argument", Bool true));
   ]
 
+let parse_function_app_tests =
+  [
+    parse_test "parse f x" "f x"
+      Ast.(FunctionApp (Identifier "f", Identifier "x"));
+    parse_test "parse  n n" "n n"
+      Ast.(FunctionApp (Identifier "n", Identifier "n"));
+    parse_test "nested functions: parse f f f" "f f f"
+      Ast.(
+        FunctionApp
+          (Identifier "f", FunctionApp (Identifier "f", Identifier "f")));
+  ]
+
 let parse_tests =
   List.flatten
     [
@@ -171,6 +183,7 @@ let parse_tests =
       parse_bop_tests;
       parse_let_tests;
       parse_function_tests;
+      parse_function_app_tests;
     ]
 
 let tests = List.flatten [ eval_tests; parse_tests ]
