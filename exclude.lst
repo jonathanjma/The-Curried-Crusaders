@@ -1,0 +1,8 @@
+_build/*
+.idea/*
+.vscode/*
+_coverage/*
+
+*.coverage
+*.zip
+.DS_Store

@@ -15,6 +15,10 @@ clean:
 	rm -rf *.coverage _coverage
 	dune clean
 
+zip:
+	rm -f iCook.zip
+	zip -r iCook.zip . -x@exclude.lst
+
 bisect:
 	rm -f *.coverage
 	-dune exec --instrument-with bisect_ppx test/main.exe
