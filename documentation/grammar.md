@@ -1,43 +1,57 @@
-# Language BNF
+# Language Grammar
+
+## First for your convenience, examples of valid statements to parse with ustove:
+Note: Not all code is logical but it shows parsing abilities with AST.
+
+
+`let x cook 10 in x+4`
+
+
+`if y then 1 else 0`
+
+
+`let p cook PIE * 10 in (if p then 1 else 0)`
+
+
+`curry n cook let a cook curry n cook n + 1 in n`
+
 
 \<integers> ::= (`0..9`)\* \
 \<character> ::= \<a single ASCII character>
+\<letter> ::= \<a single ASCII character that is not an integer>
+\<bop> ::= `+` | `*` | `fk`
 
-## Raw (primitive) types
+## Raw (primitive) values
 
 \<cal> ::= \<integers> \
 \<joul> ::= \<integers> | \<integers>.\<integers> \
-\<ing> ::= \<character\> \
-\<bop> ::= `+` | `-` | `*` | `/` | `fk` | `|` | `&` | `=` | `bs` \
 \<bool> ::= `true` | `false` \
-\<unit> ::= `unit()`
+\<rcp> ::= `"` (\<character>)* `"`\
+\<function> ::= `curry` \<rcp> `cook` \<expr> \
+\<identifier> ::= \<letter> (\<character>)*
 
-- fk is short for fork, the bitwise XOR operator in our language.
-- bs is short for brussel sprouts, it is the not equals operator.
+## Expression types
 
-## Cooked (non-primitive) types
 
-\<bowl> ::= `[` \<expr>\* `,` \<expr>* `]` \
-\<binop> ::= \<bop> $*$ ( \<cal> | \<joul>) $*$ (\<cal> | \<joul>) \
-\<expr> ::= \<cal> | \<joul> | \<rcp> | \<ing> | \<bool> | \<bowl> | \<binop> \
-\<statement> ::= \<let statement> | \<ternary statement>
-\<identifier> ::= \<cal> | \<joul> | \<rcp> | \<ing> | \<bool> | \<bowl> | \<function_decl> | \<unit>
+\<expr> ::= \<cal> | \<joul> | \<rcp> | \<bool> | \<function> | \<idenfitier> | \<let expression> | \<ternary expression> | \<binop> | \<function_app> 
 
-## Control structures
+\<binop> ::= \<expr> \<bop> \<expr>
 
-\<let statement> ::= `let` \<rcp> `cook` \<expr> `in` \<expr>
+\<let expression> ::= `let` \<identifier> `cook` \<expr> `in` \<expr> 
 
+`let n cook e1 in e2`
 - static semantics
   - evaluate e to a value v
-  - v:t $\iff$ n:t
+  - v:t if and only if n:t
 - dynamic semantics
   - evaluate e1 to a value v1
   - bind identifier n to value v1 in e2
   - evaluate e2 to a value v2
   - the value of the let_expr is v2
 
-\<ternary statement> ::= `if` \<bool> `then` \<expr> `else` \<expr>
+\<ternary expression> ::= `if` \<expr> `then` \<expr> `else` \<expr> 
 
+`if e1 then e2 else e3`
 - static semantics
   - e1 evaluates to either true or false
   - evaluate e1 to a value v1
@@ -50,24 +64,10 @@
   - if `v1` is true, then `if e1 then e2 else e3` evaluates to `v2`
   - if `v2` is false, then if `e1 then e2 else e3` evaluates to `v3`
 
-\<if statement> ::= `if` \<bool> `then` \<expr>
 
-- static semantics
-  - `p` evaluates to either true or false
-  - `e1` evaluates to unit
-- dynamic semantics
-  - evaluate p to a value v
-  - if v= true, then evaluate e to a value unit
-  - if p then e1 evaluates to unit
+\<function_app> ::= \<expr> \<expr>
 
-## Declarations
-
-\<function> ::= `curry` \<rcp> `cook` \<expr> \
-\<module_decl> ::= `shelf` \<rcp> `build` \<decl>\* `end`
-
-## Functions
-\<function_app> ::= (e1: expr) (e2: expr)
-
+`e1 e2`
 - static semantics
   - e1 evaluates to a function
   - if e1 : t1 -> t2
@@ -78,3 +78,32 @@
   - evaluate e1 to a value f1
   - evalute e2 to a value v2
   - evalute f1 v2 using the the definition of f
+
+
+
+# Not implemented
+
+\<unit> ::= `unit()`
+
+\<bop> ::= `+` | `-` | `*` | `/` | `fk` | `|` | `&` | `=` | `bs`
+
+- fk is short for fork, the bitwise XOR operator in our language.
+- bs is short for brussel sprouts, it is the not equals operator.
+
+\<bowl> ::= `[` \<expr>\* `,` \<expr>* `]` 
+
+
+
+\<if expression> ::= `if` \<expr> `then` \<expr>
+
+`if p then e`
+- static semantics
+  - `p` evaluates to either true or false
+  - `e` evaluates to unit
+- dynamic semantics
+  - evaluate p to a value v
+  - if v is true, then evaluate e to a value unit
+  - if p then e1 evaluates to unit
+
+
+\<module_decl> ::= `shelf` \<rcp> `build` \<decl>\* `end`
