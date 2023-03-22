@@ -82,6 +82,22 @@ let parse_string_tests =
     parse_test "parse \" \"" "\" \"" (Rcp " ") (* FAILING *);
   ]
 
+let random_parse_int_tests (tests : int) =
+  let rec random_parse_int_tests (tests : int) (acc : test list) =
+    let test_int : int ref = ref (Random.bits ()) in
+    let () = if Random.bool () then test_int := -1 * !test_int in
+
+    if tests = 0 then acc
+    else
+      let new_test : test =
+        parse_test
+          ("parse " ^ string_of_int !test_int)
+          (string_of_int !test_int) (Cal !test_int)
+      in
+      random_parse_int_tests (tests - 1) (new_test :: acc)
+  in
+  random_parse_int_tests tests []
+
 let random_parse_string_tests (tests : int) =
   let make_rnd_str (length : int) =
     let rec make_rnd_str (length : int) (acc : string) =
@@ -236,6 +252,23 @@ let complex_parse_tests =
           ( "a",
             Cal 1,
             LetExpression ("b", Cal 2, LetExpression ("c", Cal 3, Cal 4)) ));
+    parse_test "nested function with let"
+      "\n\
+      \    \n\
+      \    curry n cook\n\n\
+      \    let a cook curry n cook n + 1\n\n\
+      \    in n\n\
+      \    \n\
+      \    \n\
+      \    \n\
+      \    "
+      Ast.(
+        Function
+          ( "n",
+            LetExpression
+              ( "a",
+                Function ("n", Binop (Add, Identifier "n", Cal 1)),
+                Identifier "n" ) ));
   ]
 
 let parse_tests =
@@ -254,7 +287,11 @@ let parse_tests =
     ]
 
 let random_tests =
-  List.flatten [ random_parse_string_tests number_of_random_tests ]
+  List.flatten
+    [
+      random_parse_string_tests number_of_random_tests;
+      random_parse_int_tests number_of_random_tests;
+    ]
 
 let tests = List.flatten [ eval_tests; parse_tests ]
 
