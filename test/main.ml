@@ -82,6 +82,56 @@ let parse_string_tests =
     parse_test "parse \" \"" "\" \"" (Rcp " ") (* FAILING *);
   ]
 
+let string_of_bop = function
+  | Ast.Add -> "+"
+  | Ast.Mult -> "*"
+  | Ast.Fork -> "fk"
+
+let random_parse_binop_tests (tests : int) =
+  let rec random_parse_binop_tests (tests : int) (acc : test list) =
+    if tests = 0 then acc
+    else
+      let bop : Ast.bop =
+        match Random.int 3 with
+        | 0 -> Add
+        | 1 -> Mult
+        | 2 -> Fork
+        | _ -> failwith "this shouldn't run"
+      in
+
+      let a : string = Random.int 10000 |> string_of_int in
+      let b : string = Random.int 10000 |> string_of_int in
+
+      let new_test : test =
+        parse_test "parse"
+          (a ^ " " ^ string_of_bop bop ^ " " ^ b)
+          (Binop (bop, Cal (int_of_string a), Cal (int_of_string b)))
+      in
+      random_parse_binop_tests (tests - 1) (new_test :: acc)
+  in
+
+  random_parse_binop_tests tests []
+
+let random_parse_float_tests (tests : int) =
+  let rec random_parse_float_tests (tests : int) (acc : test list) =
+    let test_float : float ref =
+      ref (Random.float 10000. |> string_of_float |> float_of_string)
+    in
+
+    let () = if Random.bool () then test_float := -1. *. !test_float in
+
+    if tests = 0 then acc
+    else
+      let new_test : test =
+        parse_test
+          ("parse " ^ string_of_float !test_float ^ "0")
+          (string_of_float !test_float ^ "0")
+          (Joul !test_float)
+      in
+      random_parse_float_tests (tests - 1) (new_test :: acc)
+  in
+  random_parse_float_tests tests []
+
 let random_parse_int_tests (tests : int) =
   let rec random_parse_int_tests (tests : int) (acc : test list) =
     let test_int : int ref = ref (Random.bits ()) in
@@ -291,6 +341,8 @@ let random_tests =
     [
       random_parse_string_tests number_of_random_tests;
       random_parse_int_tests number_of_random_tests;
+      random_parse_float_tests number_of_random_tests;
+      random_parse_binop_tests number_of_random_tests;
     ]
 
 let tests = List.flatten [ eval_tests; parse_tests ]
