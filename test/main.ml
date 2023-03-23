@@ -354,4 +354,5 @@ let () =
 let () =
   if run_random_tests then (
     print_endline "\nRunning random tests";
+    Random.init_self ();
     run_test_tt_main ("random suite" >::: random_tests))
