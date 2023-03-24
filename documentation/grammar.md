@@ -23,7 +23,7 @@ Note: Not all code is logical but it shows parsing abilities with AST.
 
 ## Raw (primitive) values
 
-\<cal> ::= \<integers> \ 
+\<cal> ::= \<integers> 
 
 a valid cal must be between −2^30 and 2^30−1 
 
