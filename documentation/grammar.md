@@ -1,4 +1,4 @@
-# Language Grammar
+# Language Grammar (BNF)
 
 ## First for your convenience, examples of valid statements to parse with ustove:
 Note: Not all code is logical but it shows parsing abilities with AST.
