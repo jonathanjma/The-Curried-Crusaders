@@ -25,8 +25,8 @@ let string_of_val (e : expr) : string =
   | Cal c -> string_of_int c
   | Joul j -> string_of_float j
   | Rcp s -> s
-  | Binop _ -> failwith "Precondition violated"
-  | _ -> failwith "Unimplemented"
+  | Binop _ -> failwith "string of val Precondition violated"
+  | _ -> failwith "string of val Unimplemented"
 
 (** [is_value e] returns whether or not [e] is a value. *)
 let is_value (e : expr) : bool =
@@ -35,7 +35,10 @@ let is_value (e : expr) : bool =
   | Joul _ -> true
   | Rcp _ -> true
   | Binop _ -> false
-  | _ -> failwith "Unimplemented"
+  | Bool _ -> true
+  | Ternary _ -> false
+  | LetExpression _ -> false
+  | _ -> failwith "is value Unimplemented"
 
 (** [step e] takes some expression e and computes a step of evaluation of [e] *)
 let rec step : expr -> expr = function
@@ -45,6 +48,7 @@ let rec step : expr -> expr = function
   | Binop (bop, e1, e2) when is_value e1 && is_value e2 -> step_binop bop e1 e2
   | Binop (bop, e1, e2) when is_value e1 -> Binop (bop, e1, step e2)
   | Binop (bop, e1, e2) -> Binop (bop, step e1, e2)
+  | Ternary (b1, e1, e2) -> step_ternary b1 e1 e2
   | _ -> failwith "Unimplemented"
 
 (* [step_binop bop e1 e2] steps a binary operator that contains an operator and
@@ -59,13 +63,29 @@ and step_binop bop e1 e2 =
   | Add, Cal a, Rcp b -> Rcp (string_of_int a ^ b)
   | _ -> failwith "Precondition violated"
 
+(* [step_ternary b1 e1 e2] steps a ternary expression, such that if [b1] is
+   true, the expression evaluates to [step e1], and [step e2] if [b1] is false.
+   If [b1] is not a boolean type, then the expression fails.*)
+and step_ternary b1 e1 e2 =
+  match b1 with
+  | Bool b ->
+      if b then if is_value e1 then e1 else step e1
+      else if is_value e2 then e2
+      else step e2
+  | b when is_value b ->
+      (* b is a non-bolean value *)
+      failwith
+        "Type error: ternary expression must have boolean condition type."
+  | _ -> step_ternary (step b1) e1 e2
+
 (** [eval e] evaluates [e] to some value [v]. *)
 let rec eval (e : expr) : expr = if is_value e then e else e |> step |> eval
 
 let interp (s : string) : string = s |> parse |> eval |> string_of_val
 let nl_l (level : int) : string = "\n" ^ String.make level ' '
 
-let pretty_print_value (label : string) (f : 'a -> string) (value : 'a) : string =
+let pretty_print_value (label : string) (f : 'a -> string) (value : 'a) : string
+    =
   let string_representation : string = f value in
   label ^ " (" ^ string_representation ^ ")"
 
@@ -130,4 +150,3 @@ and pretty_print_ternary (p : expr) (e1 : expr) (e2 : expr) (level : int) =
   let end_paren_string : string = nl_l (level + 1) ^ ")" in
   "Ternary (\n" ^ p_string ^ ",\n" ^ e1_string ^ ",\n" ^ e2_string ^ ""
   ^ end_paren_string
-

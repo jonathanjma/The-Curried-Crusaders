@@ -4,7 +4,7 @@ open Main
 
 (* Random tests are performance intensive, you may not want to run them every
    time! *)
-let run_random_tests = true
+let run_random_tests = false
 
 (* This number denotes how many of each type of random test to generate *)
 let number_of_random_tests = 5000
@@ -12,6 +12,9 @@ let id x = x
 
 let eval_int_expression_test n eo i =
   n >:: fun _ -> assert_equal (string_of_int eo) (interp i) ~printer:id
+
+let eval_expression_test n eo i =
+  n >:: fun _ -> assert_equal eo (interp i) ~printer:id
 
 let eval_float_expression_test n eo f =
   n >:: fun _ -> assert_equal (string_of_float eo) (interp f) ~printer:id
@@ -51,8 +54,19 @@ let eval_string_tests =
     eval_string_expression_test "" "2a31" "1 + 1 + \"a\" + 3 + 1";
   ]
 
+let eval_ternary_tests =
+  [
+    eval_expression_test "if true then 1 else 0 -> 1" "1"
+      "if true then 1 else 0";
+    eval_expression_test "if false then 1 else 0 -> 0" "0"
+      "if false then 1 else 0";
+    eval_expression_test "if true then 1    +  1 *  4 else 3 + 2 + 1 * 1 -> 5"
+      "5" "if true then 1    +  1 *  4 else 3 + 2 + 1 * 1";
+  ]
+
 let eval_tests =
-  List.flatten [ eval_int_tests; eval_float_tests; eval_string_tests ]
+  List.flatten
+    [ eval_int_tests; eval_float_tests; eval_string_tests; eval_ternary_tests ]
 
 let parse_int_tests =
   [
