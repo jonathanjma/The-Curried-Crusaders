@@ -9,8 +9,8 @@ let digit = ['0'-'9']
 let letter = ['a'-'z' 'A'-'Z']
 let id = (letter) (letter|digit|'_')*
 
-let cal = '-'? digit+
-let joul ='-'? digit+ '.' digit+
+let cal = digit+
+let joul = '-'? digit+ '.' digit+
 let ing = letter+
 let rcp = letter+
 
@@ -20,6 +20,8 @@ rule read =
   | "+" { PLUS }
   | "*" { TIMES }
   | "fk" { FORK }
+  | "/" { DIVIDE }
+  | "-" { SUBTRACT }
   | "(" { LPAREN }
   | ")" { RPAREN }
   | "true" { TRUE }

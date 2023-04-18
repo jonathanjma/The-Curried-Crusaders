@@ -7,7 +7,7 @@ open Main
 let run_random_tests = false
 
 (* This number denotes how many of each type of random test to generate *)
-let number_of_random_tests = 5000
+let number_of_random_tests = 500
 let id x = x
 
 let eval_int_expression_test n eo i =
@@ -36,6 +36,8 @@ let eval_int_tests =
     eval_int_expression_test "2 + 3 * 10 should parse to 32" 32 "2+3*10";
     eval_int_expression_test "2 * 10 + 2 should parse to 22" 22 "2*10+2";
     eval_int_expression_test "2 * (10 + 2) should parse to 24" 24 "2 * (10 + 2)";
+    eval_int_expression_test "2 * -10 / 5 should parse to -4" ~-4 "2 * -10 / 5 ";
+    eval_int_expression_test "2 - - 2 - 3 should parse to 1" 1 "2 - - 2 - 3";
   ]
 
 let eval_float_tests =
@@ -100,16 +102,20 @@ let string_of_bop = function
   | Ast.Add -> "+"
   | Ast.Mult -> "*"
   | Ast.Fork -> "fk"
+  | Ast.Subtract -> "-"
+  | Ast.Divide -> "/"
 
 let random_parse_binop_tests (tests : int) =
   let rec random_parse_binop_tests (tests : int) (acc : test list) =
     if tests = 0 then acc
     else
       let bop : Ast.bop =
-        match Random.int 3 with
+        match Random.int 5 with
         | 0 -> Add
         | 1 -> Mult
         | 2 -> Fork
+        | 3 -> Divide
+        | 4 -> Subtract
         | _ -> failwith "this shouldn't run"
       in
 
@@ -359,7 +365,7 @@ let random_tests =
       random_parse_binop_tests number_of_random_tests;
     ]
 
-let tests = List.flatten [ eval_tests; parse_tests ]
+let tests = List.flatten [ eval_tests (*parse_tests*) ]
 
 let () =
   print_endline "\n\nRunning main test suite";

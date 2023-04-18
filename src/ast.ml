@@ -3,6 +3,8 @@ type bop =
   | Add
   | Mult
   | Fork (* Fork is the xor operator (xor logic gate looks like fork) *)
+  | Subtract
+  | Divide
 
 (** The type of the abstract syntax tree (AST). *)
 
@@ -10,6 +12,8 @@ let bop_to_string : bop -> string = function
   | Add -> "ADD"
   | Mult -> "MULT"
   | Fork -> "FORK"
+  | Divide -> "DIVIDE"
+  | Subtract -> "SUBTRACT"
 
 type expr =
   | Cal of int

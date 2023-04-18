@@ -23,6 +23,8 @@ open Ast
 %token LPAREN
 %token RPAREN
 %token EOF
+%token DIVIDE
+%token SUBTRACT
 
 %token DOUBLE_QUOTE
 %token SINGLE_QUOTE
@@ -40,8 +42,11 @@ open Ast
 (* lower precedence operators *)
 
 %left FORK
+%nonassoc SUBTRACT 
+
 %left PLUS
-%left TIMES
+%left TIMES %left DIVIDE
+
 
 (* higher precedence operators *)
 
@@ -59,6 +64,9 @@ expr:
   | e1 = expr; PLUS; e2 = expr { Binop (Add, e1, e2) }
   | e1 = expr; FORK; e2 = expr { Binop (Fork, e1, e2) }
   | e1 = expr; TIMES; e2 = expr { Binop (Mult, e1, e2) }
+  | e1 = expr; DIVIDE; e2 = expr { Binop (Divide, e1, e2) }
+  | e1 = expr; SUBTRACT; e2 = expr { Binop (Subtract, e1, e2) }
+  | SUBTRACT; e1 = expr { Binop (Subtract, Cal 0, e1) }
   | LPAREN; e = expr; RPAREN { e }
   | l_e = let_expr { l_e }
   | t = ternary_expr { t }

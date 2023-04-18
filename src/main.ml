@@ -58,6 +58,8 @@ and step_binop bop e1 e2 =
   | Add, Cal a, Cal b -> Cal (a + b)
   | Mult, Cal a, Cal b -> Cal (a * b)
   | Fork, Cal a, Cal b -> Cal (Int.logxor a b)
+  | Subtract, Cal a, Cal b -> Cal (a - b)
+  | Divide, Cal a, Cal b -> Cal (a / b)
   | Add, Rcp a, Rcp b -> Rcp (a ^ b)
   | Add, Rcp a, Cal b -> Rcp (a ^ string_of_int b)
   | Add, Cal a, Rcp b -> Rcp (string_of_int a ^ b)
