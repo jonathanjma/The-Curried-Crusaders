@@ -4,7 +4,7 @@ open Main
 
 (* Random tests are performance intensive, you may not want to run them every
    time! *)
-let run_random_tests = true
+let run_random_tests = false
 
 (* This number denotes how many of each type of random test to generate *)
 let number_of_random_tests = 500
@@ -87,6 +87,9 @@ let eval_ternary_tests =
       "5" "if true then 1    +  1 *  4 else 3 + 2 + 1 * 1";
   ]
 
+let parse_bowl_tests =
+  [ parse_test "[  ]  should parse to []" " [  ]  " (Bowl []) ]
+
 let eval_binop_tests =
   [
     eval_float_expression_test "2 + 3.0 -> 5.0" 5.0 "2 + 3.0";
@@ -123,13 +126,10 @@ let parse_string_tests =
   [
     parse_test "parse \"test\"" "\"test\"" (Rcp "test");
     parse_test "parse \"\"" "\"\"" (Rcp "");
-    (* FAILING *)
     parse_test "parse \"a a\"" "\"a a\"" (Rcp "a a");
-    (* FAILING *)
     parse_test "parse \"this is a test\"" "\"this is a test\""
       (Rcp "this is a test");
-    (* FAILING *)
-    parse_test "parse \" \"" "\" \"" (Rcp " ") (* FAILING *);
+    parse_test "parse \" \"" "\" \"" (Rcp " ");
   ]
 
 let string_of_bop = function
@@ -391,6 +391,7 @@ let parse_tests =
       parse_function_tests;
       parse_function_app_tests;
       parse_ternary_tests;
+      parse_bowl_tests;
       complex_parse_tests;
     ]
 

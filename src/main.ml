@@ -20,13 +20,27 @@ let parse (s : string) : expr =
         (Error (Printf.sprintf "%s: syntax error" (print_error_position lexbuf)))
 
 (** [string_of_val e] converts [e] to a string.contents Requires: [e] is a value *)
-let string_of_val (e : expr) : string =
+let rec string_of_val (e : expr) : string =
   match e with
   | Cal c -> string_of_int c
   | Joul j -> string_of_float j
   | Rcp s -> s
+  | Bool b -> string_of_bool b
+  | Bowl b -> (
+      match b with
+      | [] -> "[]"
+      | _ -> "[" ^ string_of_bowl b ^ "]")
   | Binop _ -> failwith "string of val Precondition violated"
   | _ -> failwith "string of val Unimplemented"
+
+and string_of_bowl b =
+  let rec string_of_bowl_tr acc = function
+    | [] -> acc
+    | h :: t ->
+        if t = [] then acc ^ string_of_val h
+        else string_of_bowl_tr (acc ^ string_of_val h ^ ", ") t
+  in
+  string_of_bowl_tr "" b
 
 (** [is_value e] returns whether or not [e] is a value. *)
 let is_value (e : expr) : bool =
@@ -39,6 +53,7 @@ let is_value (e : expr) : bool =
   | Ternary _ -> false
   | LetExpression _ -> false
   | Unop _ -> false
+  | Bowl _ -> true
   | _ -> failwith "is value Unimplemented"
 
 (** [step e] takes some expression e and computes a step of evaluation of [e] *)

@@ -103,6 +103,7 @@ value:
   | PIE { Joul Float.pi }
   | TRUE { Bool true }
   | FALSE { Bool false }
+  | LBRAC; RBRAC { Bowl [] }
   | LBRAC; l = BOWL; RBRAC { Bowl l }
   | f = function_value {f}
   | a = function_app {a}
