@@ -23,6 +23,11 @@ let eval_string_expression_test name expected_output string_expression =
   name >:: fun _ ->
   assert_equal expected_output (interp string_expression) ~printer:id
 
+let eval_autonamed_string_expression_test expected_output string_expression =
+  eval_string_expression_test
+    (string_expression ^ " should parse to " ^ expected_output)
+    expected_output string_expression
+
 let parse_test (name : string) (input : string) (expected_output : Ast.expr) =
   name >:: fun _ -> assert_equal (parse input) expected_output
 
@@ -64,7 +69,12 @@ let eval_string_tests =
     eval_string_expression_test "\"abcde\" + \"a\" should parse to abcdea"
       "abcdea" "\"abcde\" + \"a\"";
     eval_string_expression_test "\"a\" + 1 should parse to a1" "a1" "\"a\" + 1";
-    eval_string_expression_test "" "2a31" "1 + 1 + \"a\" + 3 + 1";
+    eval_autonamed_string_expression_test "2a31" "1 + 1 + \"a\" + 3 + 1";
+    eval_autonamed_string_expression_test "2.a1.110"
+      "2.0 + \"a\" +  1.1  + \"1\" + 0";
+    eval_autonamed_string_expression_test
+      ("so true that PI(E) = " ^ string_of_float Float.pi)
+      "\"so \" + true + \" that PI(E) = \" + PIE";
   ]
 
 let eval_ternary_tests =
@@ -77,17 +87,30 @@ let eval_ternary_tests =
       "5" "if true then 1    +  1 *  4 else 3 + 2 + 1 * 1";
   ]
 
+let eval_binop_tests =
+  [
+    eval_float_expression_test "2 + 3.0 -> 5.0" 5.0 "2 + 3.0";
+    eval_float_expression_test "3.0 + 5.0 * 2 / 1.0 / 2 -> 8.0" 8.0
+      "3.0 + 5.0 * 2 / 1.0 / 2";
+  ]
+
 let eval_tests =
   List.flatten
-    [ eval_int_tests; eval_float_tests; eval_string_tests; eval_ternary_tests ]
+    [
+      eval_int_tests;
+      eval_float_tests;
+      eval_string_tests;
+      eval_ternary_tests;
+      eval_binop_tests;
+    ]
 
 let parse_int_tests =
   [
     parse_test "parse 1" "1" (Cal 1);
     parse_test "parse 0" "0" (Cal 0);
-    parse_test "parse 12345" "12345" (Cal 12345)
-    (* parse_test "parse -1" "-1" (Cal (-1)); *)
-    (* parse_test "parse -99999" "-99999" (Cal (-99999)); *);
+    parse_test "parse 12345" "12345" (Cal 12345);
+    parse_test "parse ~1" "~1" (Unop (Unegation, Cal 1));
+    parse_test "parse ~99999" "~99999" (Unop (Unegation, Cal 99999));
   ]
 
 let parse_bool_tests =

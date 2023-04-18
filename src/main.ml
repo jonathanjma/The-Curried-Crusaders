@@ -34,8 +34,8 @@ let is_value (e : expr) : bool =
   | Cal _ -> true
   | Joul _ -> true
   | Rcp _ -> true
-  | Binop _ -> false
   | Bool _ -> true
+  | Binop _ -> false
   | Ternary _ -> false
   | LetExpression _ -> false
   | Unop _ -> false
