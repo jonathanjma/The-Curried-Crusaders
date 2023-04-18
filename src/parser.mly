@@ -25,6 +25,7 @@ open Ast
 %token EOF
 %token DIVIDE
 %token SUBTRACT
+%token UNEGATION
 
 %token DOUBLE_QUOTE
 %token SINGLE_QUOTE
@@ -42,10 +43,11 @@ open Ast
 (* lower precedence operators *)
 
 %left FORK
-%nonassoc SUBTRACT 
 
-%left PLUS
-%left TIMES %left DIVIDE
+%left PLUS SUBTRACT 
+%left TIMES DIVIDE
+
+
 
 
 (* higher precedence operators *)
@@ -53,6 +55,13 @@ open Ast
 %start <Ast.expr> prog
 
 %%
+
+%inline bop:
+| UNEGATION { Unegation }
+| PLUS { Add }
+| SUBTRACT { Subtract }
+| TIMES { Mult }
+| DIVIDE { Divide }
 
 prog:
   | e = expr; EOF { e }
@@ -66,7 +75,7 @@ expr:
   | e1 = expr; TIMES; e2 = expr { Binop (Mult, e1, e2) }
   | e1 = expr; DIVIDE; e2 = expr { Binop (Divide, e1, e2) }
   | e1 = expr; SUBTRACT; e2 = expr { Binop (Subtract, e1, e2) }
-  | SUBTRACT; e1 = expr { Binop (Subtract, Cal 0, e1) }
+  | UNEGATION; e1 = expr { Unop (Unegation, e1) }
   | LPAREN; e = expr; RPAREN { e }
   | l_e = let_expr { l_e }
   | t = ternary_expr { t }

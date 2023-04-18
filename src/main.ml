@@ -38,6 +38,7 @@ let is_value (e : expr) : bool =
   | Bool _ -> true
   | Ternary _ -> false
   | LetExpression _ -> false
+  | Unop _ -> false
   | _ -> failwith "is value Unimplemented"
 
 (** [step e] takes some expression e and computes a step of evaluation of [e] *)
@@ -45,6 +46,7 @@ let rec step : expr -> expr = function
   | Cal _ -> failwith "Doesn't step"
   | Joul _ -> failwith "Doesn't step"
   | Rcp _ -> failwith "Doesn't step"
+  | Unop (op, e1) -> step_unop op e1
   | Binop (bop, e1, e2) when is_value e1 && is_value e2 -> step_binop bop e1 e2
   | Binop (bop, e1, e2) when is_value e1 -> Binop (bop, e1, step e2)
   | Binop (bop, e1, e2) -> Binop (bop, step e1, e2)
@@ -55,15 +57,33 @@ let rec step : expr -> expr = function
    two values. Requires: [e1] and [e2] are values. *)
 and step_binop bop e1 e2 =
   match (bop, e1, e2) with
-  | Add, Cal a, Cal b -> Cal (a + b)
-  | Mult, Cal a, Cal b -> Cal (a * b)
+  | Mult, e1, e2 -> handleIntAndFloatOp (e1, e2) ( * ) ( *. )
   | Fork, Cal a, Cal b -> Cal (Int.logxor a b)
-  | Subtract, Cal a, Cal b -> Cal (a - b)
-  | Divide, Cal a, Cal b -> Cal (a / b)
-  | Add, Rcp a, Rcp b -> Rcp (a ^ b)
-  | Add, Rcp a, Cal b -> Rcp (a ^ string_of_int b)
-  | Add, Cal a, Rcp b -> Rcp (string_of_int a ^ b)
+  | Subtract, e1, e2 -> handleIntAndFloatOp (e1, e2) ( - ) ( -. )
+  | Divide, e1, e2 -> handleIntAndFloatOp (e1, e2) ( / ) ( /. )
+  | Add, a, b -> handleAdd (a, b)
+  | _ -> failwith "Type error: those types do not work the binary operator"
+
+and handleIntAndFloatOp (e1, e2) intOp floatOp =
+  match (e1, e2) with
+  | Cal a, Cal b -> Cal (intOp a b)
+  | Cal a, Joul b -> Joul (floatOp (float_of_int a) b)
+  | Joul a, Cal b -> Joul (floatOp a (float_of_int b))
+  | Joul a, Joul b -> Joul (floatOp a b)
   | _ -> failwith "Precondition violated"
+
+and handleAdd (e1, e2) =
+  match (e1, e2) with
+  | Rcp a, Rcp b -> Rcp (a ^ b)
+  | Rcp a, Cal b -> Rcp (a ^ string_of_int b)
+  | Cal a, Rcp b -> Rcp (string_of_int a ^ b)
+  | Rcp a, Joul b -> Rcp (a ^ string_of_float b)
+  | Joul a, Rcp b -> Rcp (string_of_float a ^ b)
+  | Rcp a, Bool b -> Rcp (a ^ string_of_bool b)
+  | Bool a, Rcp b -> Rcp (string_of_bool a ^ b)
+  | Rcp a, Ing b -> Rcp (a ^ b)
+  | Ing a, Rcp b -> Rcp (a ^ b)
+  | _ -> handleIntAndFloatOp (e1, e2) ( + ) ( +. )
 
 (* [step_ternary b1 e1 e2] steps a ternary expression, such that if [b1] is
    true, the expression evaluates to [step e1], and [step e2] if [b1] is false.
@@ -79,6 +99,16 @@ and step_ternary b1 e1 e2 =
       failwith
         "Type error: ternary expression must have boolean condition type."
   | _ -> step_ternary (step b1) e1 e2
+
+and step_unop op e1 =
+  match op with
+  | Unegation ->
+      if is_value e1 then
+        match e1 with
+        | Cal a -> Cal ~-a
+        | Joul b -> Joul ~-.b
+        | _ -> failwith "Type error"
+      else Unop (Unegation, step e1)
 
 (** [eval e] evaluates [e] to some value [v]. *)
 let rec eval (e : expr) : expr = if is_value e then e else e |> step |> eval
@@ -108,6 +138,7 @@ let rec pretty_print (e : expr) (level : int) : string =
     | Function (n, e) -> pretty_print_function n e level
     | FunctionApp (e1, e2) -> pretty_print_function_app e1 e2 level
     | Ternary (p, e1, e2) -> pretty_print_ternary p e1 e2 level
+    | Unop (op, e1) -> pretty_print_unop op e1 level
     | _ -> failwith "unimplemented"
   in
   indentations ^ rest
@@ -120,6 +151,15 @@ and pretty_print_binop (bop : bop) (e1 : expr) (e2 : expr) (level : int) :
   "Binop ("
   ^ nl_l (level + 2)
   ^ bop_string ^ ",\n" ^ pp_e1 ^ ",\n" ^ pp_e2
+  ^ nl_l (level + 1)
+  ^ ")"
+
+and pretty_print_unop (op : unop) (e1 : expr) (level : int) : string =
+  let op_string : string = unop_to_string op in
+  let pp_e1 : string = pretty_print e1 (level + 1) in
+  "Unop ("
+  ^ nl_l (level + 2)
+  ^ op_string ^ ",\n" ^ pp_e1
   ^ nl_l (level + 1)
   ^ ")"
 
