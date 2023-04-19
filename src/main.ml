@@ -25,16 +25,19 @@ let string_of_val (e : expr) : string =
   | Cal c -> string_of_int c
   | Joul j -> string_of_float j
   | Rcp s -> s
+  | Nil -> "[]"
   | Binop _ -> failwith "Precondition violated"
   | _ -> failwith "Unimplemented"
 
 (** [is_value e] returns whether or not [e] is a value. *)
-let is_value (e : expr) : bool =
+let rec is_value (e : expr) : bool =
   match e with
   | Cal _ -> true
   | Joul _ -> true
   | Rcp _ -> true
   | Binop _ -> false
+  | Nil -> true
+  | Bowl e -> is_value e
   | _ -> failwith "Unimplemented"
 
 (** [step e] takes some expression e and computes a step of evaluation of [e] *)
@@ -65,7 +68,8 @@ let rec eval (e : expr) : expr = if is_value e then e else e |> step |> eval
 let interp (s : string) : string = s |> parse |> eval |> string_of_val
 let nl_l (level : int) : string = "\n" ^ String.make level ' '
 
-let pretty_print_value (label : string) (f : 'a -> string) (value : 'a) : string =
+let pretty_print_value (label : string) (f : 'a -> string) (value : 'a) : string
+    =
   let string_representation : string = f value in
   label ^ " (" ^ string_representation ^ ")"
 
@@ -80,15 +84,21 @@ let rec pretty_print (e : expr) (level : int) : string =
     | Joul a -> pretty_print_value "Joul" string_of_float a
     | Bool a -> pretty_print_value "Bool" string_of_bool a
     | Ing a -> pretty_print_value "Ing" (fun x -> x) a
+    | Nil -> pretty_print_value "Nil" (fun x -> x) "[]"
     | Identifier a -> pretty_print_value "Id" (fun x -> x) a
+    | Bowl e -> pretty_print_bowl e level
     | Binop (bop, e1, e2) -> pretty_print_binop bop e1 e2 level
     | LetExpression (name, e1, e2) -> pretty_print_let name e1 e2 level
     | Function (n, e) -> pretty_print_function n e level
     | FunctionApp (e1, e2) -> pretty_print_function_app e1 e2 level
     | Ternary (p, e1, e2) -> pretty_print_ternary p e1 e2 level
-    | _ -> failwith "unimplemented"
+    (* | _ -> failwith "unimplemented" *)
   in
   indentations ^ rest
+
+and pretty_print_bowl (e : expr) (level : int) : string =
+  let pp_e : string = pretty_print e (level + 1) in
+  "Bowl (" ^ nl_l (level + 1) ^ pp_e ^ nl_l (level + 1) ^ ")"
 
 and pretty_print_binop (bop : bop) (e1 : expr) (e2 : expr) (level : int) :
     string =
@@ -130,4 +140,3 @@ and pretty_print_ternary (p : expr) (e1 : expr) (e2 : expr) (level : int) =
   let end_paren_string : string = nl_l (level + 1) ^ ")" in
   "Ternary (\n" ^ p_string ^ ",\n" ^ e1_string ^ ",\n" ^ e2_string ^ ""
   ^ end_paren_string
-
