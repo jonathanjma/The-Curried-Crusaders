@@ -86,6 +86,7 @@ let string_of_bop = function
   | Ast.Add -> "+"
   | Ast.Mult -> "*"
   | Ast.Fork -> "fk"
+  | Ast.Cons -> "::"
 
 let random_parse_binop_tests (tests : int) =
   let rec random_parse_binop_tests (tests : int) (acc : test list) =
