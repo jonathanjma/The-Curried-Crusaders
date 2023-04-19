@@ -55,6 +55,9 @@ and ustring_commands p = function
       let _ = Sys.command "clear" in
       print_endline "ustove cleared.\nPlease enter a command.";
       take_commands 2
+  | "re" ->
+      let _ = Sys.command "make ustove" in
+      print_endline ""
   | _ ->
       print_endline "Invalid command.";
       take_commands p
