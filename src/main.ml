@@ -45,15 +45,8 @@ and string_of_bowl b =
 (** [is_value e] returns whether or not [e] is a value. *)
 let is_value (e : expr) : bool =
   match e with
-  | Cal _ -> true
-  | Joul _ -> true
-  | Rcp _ -> true
-  | Bool _ -> true
-  | Binop _ -> false
-  | Ternary _ -> false
-  | LetExpression _ -> false
-  | Unop _ -> false
-  | Bowl _ -> true
+  | Cal _ | Joul _ | Rcp _ | LetExpression _ | Bool _ | Bowl _ -> true
+  | Binop _ | Ternary _ | Unop _ -> false
   | _ -> failwith "is value Unimplemented"
 
 (** [step e] takes some expression e and computes a step of evaluation of [e] *)
