@@ -23,6 +23,9 @@ open Ast
 %token LPAREN
 %token RPAREN
 %token EOF
+%token DIVIDE
+%token SUBTRACT
+%token UNEGATION
 
 %token DOUBLE_QUOTE
 %token SINGLE_QUOTE
@@ -40,14 +43,25 @@ open Ast
 (* lower precedence operators *)
 
 %left FORK
-%left PLUS
-%left TIMES
+
+%left PLUS SUBTRACT 
+%left TIMES DIVIDE
+
+
+
 
 (* higher precedence operators *)
 
 %start <Ast.expr> prog
 
 %%
+
+%inline bop:
+| UNEGATION { Unegation }
+| PLUS { Add }
+| SUBTRACT { Subtract }
+| TIMES { Mult }
+| DIVIDE { Divide }
 
 prog:
   | e = expr; EOF { e }
@@ -59,6 +73,9 @@ expr:
   | e1 = expr; PLUS; e2 = expr { Binop (Add, e1, e2) }
   | e1 = expr; FORK; e2 = expr { Binop (Fork, e1, e2) }
   | e1 = expr; TIMES; e2 = expr { Binop (Mult, e1, e2) }
+  | e1 = expr; DIVIDE; e2 = expr { Binop (Divide, e1, e2) }
+  | e1 = expr; SUBTRACT; e2 = expr { Binop (Subtract, e1, e2) }
+  | UNEGATION; e1 = expr { Unop (Unegation, e1) }
   | LPAREN; e = expr; RPAREN { e }
   | l_e = let_expr { l_e }
   | t = ternary_expr { t }
@@ -86,6 +103,7 @@ value:
   | PIE { Joul Float.pi }
   | TRUE { Bool true }
   | FALSE { Bool false }
+  | LBRAC; RBRAC { Bowl [] }
   | LBRAC; l = BOWL; RBRAC { Bowl l }
   | f = function_value {f}
   | a = function_app {a}

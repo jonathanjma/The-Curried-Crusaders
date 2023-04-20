@@ -3,6 +3,11 @@ type bop =
   | Add
   | Mult
   | Fork (* Fork is the xor operator (xor logic gate looks like fork) *)
+  | Subtract
+  | Divide
+
+(** The type of unary operators *)
+type unop = Unegation (* Unegation represents unary negation *)
 
 (** The type of the abstract syntax tree (AST). *)
 
@@ -10,12 +15,18 @@ let bop_to_string : bop -> string = function
   | Add -> "ADD"
   | Mult -> "MULT"
   | Fork -> "FORK"
+  | Divide -> "DIVIDE"
+  | Subtract -> "SUBTRACT"
+
+let unop_to_string : unop -> string = function
+  | Unegation -> "UNEGATION"
 
 type expr =
   | Cal of int
   | Joul of float
   | Rcp of string
   | Ing of string
+  | Unop of unop * expr
   | Bool of bool
   | Bowl of expr list
   | Binop of bop * expr * expr

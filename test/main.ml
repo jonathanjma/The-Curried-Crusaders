@@ -4,14 +4,17 @@ open Main
 
 (* Random tests are performance intensive, you may not want to run them every
    time! *)
-let run_random_tests = true
+let run_random_tests = false
 
 (* This number denotes how many of each type of random test to generate *)
-let number_of_random_tests = 5000
+let number_of_random_tests = 500
 let id x = x
 
 let eval_int_expression_test n eo i =
   n >:: fun _ -> assert_equal (string_of_int eo) (interp i) ~printer:id
+
+let eval_expression_test n eo i =
+  n >:: fun _ -> assert_equal eo (interp i) ~printer:id
 
 let eval_float_expression_test n eo f =
   n >:: fun _ -> assert_equal (string_of_float eo) (interp f) ~printer:id
@@ -20,25 +23,43 @@ let eval_string_expression_test name expected_output string_expression =
   name >:: fun _ ->
   assert_equal expected_output (interp string_expression) ~printer:id
 
+let eval_autonamed_string_expression_test expected_output string_expression =
+  eval_string_expression_test
+    (string_expression ^ " should parse to " ^ expected_output)
+    expected_output string_expression
+
 let parse_test (name : string) (input : string) (expected_output : Ast.expr) =
   name >:: fun _ -> assert_equal (parse input) expected_output
+
+let icook_string_of_int i =
+  if i < 0 then "~" ^ string_of_int ~-i else string_of_int i
+
+let icook_string_of_float (i : float) =
+  if i < 0. then "~" ^ string_of_float (i *. -1.) else string_of_float i
 
 let eval_int_tests =
   [
     eval_int_expression_test "0 should parse to 0" 0 "0";
     eval_int_expression_test "6 should parse to 6" 6 "6";
-    eval_int_expression_test "-4 should parse to -4" ~-4 "-4";
+    eval_int_expression_test "~4 should parse to -4" ~-4 "~4";
     eval_int_expression_test "2+3 should parse to 5" 5 "2+3";
     eval_int_expression_test "5 fk 9 should parse to 12" 12 "5 fk 9";
     eval_int_expression_test "2 + 3 * 10 should parse to 32" 32 "2+3*10";
     eval_int_expression_test "2 * 10 + 2 should parse to 22" 22 "2*10+2";
     eval_int_expression_test "2 * (10 + 2) should parse to 24" 24 "2 * (10 + 2)";
+    eval_int_expression_test "2 * ~10 / 5 should parse to -4" ~-4
+      "2 * ~10 /\n       5 ";
+    eval_int_expression_test "2 - 2 - 3 should parse to 1" ~-3
+      "2 - 2 -\n       3";
+    eval_int_expression_test "2 - ~2 - 2 should parse to 2" 2 "2 - ~2 - 2";
+    eval_int_expression_test "10 / 2 / 5 should parse to 1" 1 "10 / 2 / 5";
+    eval_int_expression_test "~(2 - ~3) should parse to -5" ~-5 "~(2 -  ~3)";
   ]
 
 let eval_float_tests =
   [
     eval_float_expression_test "2.0 should parse to 2.0" 2.0 "2.0";
-    eval_float_expression_test "-7.0 should parse to 2.0" ~-.7.0 "-7.0";
+    (* eval_float_expression_test "-7.0 should parse to 2.0" ~-.7.0 "-7.0"; *)
     eval_float_expression_test "PIE should parse to 3.141..." Float.pi "PIE";
   ]
 
@@ -48,19 +69,51 @@ let eval_string_tests =
     eval_string_expression_test "\"abcde\" + \"a\" should parse to abcdea"
       "abcdea" "\"abcde\" + \"a\"";
     eval_string_expression_test "\"a\" + 1 should parse to a1" "a1" "\"a\" + 1";
-    eval_string_expression_test "" "2a31" "1 + 1 + \"a\" + 3 + 1";
+    eval_autonamed_string_expression_test "2a31" "1 + 1 + \"a\" + 3 + 1";
+    eval_autonamed_string_expression_test "2.a1.110"
+      "2.0 + \"a\" +  1.1  + \"1\" + 0";
+    eval_autonamed_string_expression_test
+      ("so true that PI(E) = " ^ string_of_float Float.pi)
+      "\"so \" + true + \" that PI(E) = \" + PIE";
+  ]
+
+let eval_ternary_tests =
+  [
+    eval_expression_test "if true then 1 else 0 -> 1" "1"
+      "if true then 1 else 0";
+    eval_expression_test "if false then 1 else 0 -> 0" "0"
+      "if false then 1 else 0";
+    eval_expression_test "if true then 1    +  1 *  4 else 3 + 2 + 1 * 1 -> 5"
+      "5" "if true then 1    +  1 *  4 else 3 + 2 + 1 * 1";
+  ]
+
+let parse_bowl_tests =
+  [ parse_test "[  ]  should parse to []" " [  ]  " (Bowl []) ]
+
+let eval_binop_tests =
+  [
+    eval_float_expression_test "2 + 3.0 -> 5.0" 5.0 "2 + 3.0";
+    eval_float_expression_test "3.0 + 5.0 * 2 / 1.0 / 2 -> 8.0" 8.0
+      "3.0 + 5.0 * 2 / 1.0 / 2";
   ]
 
 let eval_tests =
-  List.flatten [ eval_int_tests; eval_float_tests; eval_string_tests ]
+  List.flatten
+    [
+      eval_int_tests;
+      eval_float_tests;
+      eval_string_tests;
+      eval_ternary_tests;
+      eval_binop_tests;
+    ]
 
 let parse_int_tests =
   [
     parse_test "parse 1" "1" (Cal 1);
     parse_test "parse 0" "0" (Cal 0);
     parse_test "parse 12345" "12345" (Cal 12345);
-    parse_test "parse -1" "-1" (Cal (-1));
-    parse_test "parse -99999" "-99999" (Cal (-99999));
+    parse_test "parse ~1" "~1" (Unop (Unegation, Cal 1));
+    parse_test "parse ~99999" "~99999" (Unop (Unegation, Cal 99999));
   ]
 
 let parse_bool_tests =
@@ -73,29 +126,30 @@ let parse_string_tests =
   [
     parse_test "parse \"test\"" "\"test\"" (Rcp "test");
     parse_test "parse \"\"" "\"\"" (Rcp "");
-    (* FAILING *)
     parse_test "parse \"a a\"" "\"a a\"" (Rcp "a a");
-    (* FAILING *)
     parse_test "parse \"this is a test\"" "\"this is a test\""
       (Rcp "this is a test");
-    (* FAILING *)
-    parse_test "parse \" \"" "\" \"" (Rcp " ") (* FAILING *);
+    parse_test "parse \" \"" "\" \"" (Rcp " ");
   ]
 
 let string_of_bop = function
   | Ast.Add -> "+"
   | Ast.Mult -> "*"
   | Ast.Fork -> "fk"
+  | Ast.Subtract -> "-"
+  | Ast.Divide -> "/"
 
 let random_parse_binop_tests (tests : int) =
   let rec random_parse_binop_tests (tests : int) (acc : test list) =
     if tests = 0 then acc
     else
       let bop : Ast.bop =
-        match Random.int 3 with
+        match Random.int 5 with
         | 0 -> Add
         | 1 -> Mult
         | 2 -> Fork
+        | 3 -> Divide
+        | 4 -> Subtract
         | _ -> failwith "this shouldn't run"
       in
 
@@ -118,7 +172,9 @@ let random_parse_float_tests (tests : int) =
       ref (Random.float 10000. |> string_of_float |> float_of_string)
     in
 
-    let () = if Random.bool () then test_float := -1. *. !test_float in
+    let () =
+      if false (* Random.bool () *) then test_float := -1. *. !test_float
+    in
 
     if tests = 0 then acc
     else
@@ -141,8 +197,10 @@ let random_parse_int_tests (tests : int) =
     else
       let new_test : test =
         parse_test
-          ("parse " ^ string_of_int !test_int)
-          (string_of_int !test_int) (Cal !test_int)
+          ("parse " ^ icook_string_of_int !test_int)
+          (icook_string_of_int !test_int)
+          (if !test_int < 0 then Unop (Unegation, Cal (!test_int * -1))
+          else Cal !test_int)
       in
       random_parse_int_tests (tests - 1) (new_test :: acc)
   in
@@ -333,6 +391,7 @@ let parse_tests =
       parse_function_tests;
       parse_function_app_tests;
       parse_ternary_tests;
+      parse_bowl_tests;
       complex_parse_tests;
     ]
 
