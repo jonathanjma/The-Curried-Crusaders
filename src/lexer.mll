@@ -23,6 +23,7 @@ rule read =
   | "/" { DIVIDE }
   | "-" { SUBTRACT }
   | "~" { UNEGATION }
+  | "::" { CONS }
   | "(" { LPAREN }
   | ")" { RPAREN }
   | "true" { TRUE }
@@ -40,12 +41,11 @@ rule read =
   | "else" { ELSE }
   | id { ID (Lexing.lexeme lexbuf) }
   | "\"" { read_string (Buffer.create 17) lexbuf }
-  (* | "'" { read_char (Buffer.create 17) lexbuf } *)
-  (*| ing { ING (String.get (Lexing.lexeme lexbuf) 0) }*) (* idk why char doesn't work... *)
   | cal { CAL (int_of_string (Lexing.lexeme lexbuf)) }
   | joul { JOUL (float_of_string (Lexing.lexeme lexbuf)) }
   | eof { EOF }
   | _ { raise (SyntaxError ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
+
 and read_string buf =
   parse
   | "\"" { RCP (Buffer.contents buf) }

@@ -28,17 +28,19 @@ let rec string_of_val (e : expr) : string =
   | Bool b -> string_of_bool b
   | Bowl b -> (
       match b with
-      | [] -> "[]"
+      | Nil -> "[]"
       | _ -> "[" ^ string_of_bowl b ^ "]")
+  | Nil -> "[]"
   | Binop _ -> failwith "string of val Precondition violated"
   | _ -> failwith "string of val Unimplemented"
 
 and string_of_bowl b =
   let rec string_of_bowl_tr acc = function
-    | [] -> acc
-    | h :: t ->
-        if t = [] then acc ^ string_of_val h
+    | Nil -> acc
+    | Binop (_, h, t) ->
+        if t = Nil then acc ^ string_of_val h
         else string_of_bowl_tr (acc ^ string_of_val h ^ ", ") t
+    | _ -> failwith "Precondition violated"
   in
   string_of_bowl_tr "" b
 
@@ -47,7 +49,7 @@ let is_value (e : expr) : bool =
   match e with
   | Cal _ | Joul _ | Rcp _ | LetExpression _ | Bool _ | Bowl _ -> true
   | Binop _ | Ternary _ | Unop _ -> false
-  | _ -> failwith "is value Unimplemented"
+  | _ -> failwith "Unimplemented"
 
 (** [step e] takes some expression e and computes a step of evaluation of [e] *)
 let rec step : expr -> expr = function
@@ -140,16 +142,22 @@ let rec pretty_print (e : expr) (level : int) : string =
     | Joul a -> pretty_print_value "Joul" string_of_float a
     | Bool a -> pretty_print_value "Bool" string_of_bool a
     | Ing a -> pretty_print_value "Ing" (fun x -> x) a
+    | Nil -> pretty_print_value "Nil" (fun x -> x) "[]"
     | Identifier a -> pretty_print_value "Id" (fun x -> x) a
+    | Bowl e -> pretty_print_bowl e level
     | Binop (bop, e1, e2) -> pretty_print_binop bop e1 e2 level
     | LetExpression (name, e1, e2) -> pretty_print_let name e1 e2 level
     | Function (n, e) -> pretty_print_function n e level
     | FunctionApp (e1, e2) -> pretty_print_function_app e1 e2 level
     | Ternary (p, e1, e2) -> pretty_print_ternary p e1 e2 level
     | Unop (op, e1) -> pretty_print_unop op e1 level
-    | _ -> failwith "unimplemented"
+    (* | _ -> failwith "unimplemented" *)
   in
   indentations ^ rest
+
+and pretty_print_bowl (e : expr) (level : int) : string =
+  let pp_e : string = pretty_print e (level + 1) in
+  "Bowl (" ^ nl_l (level + 1) ^ pp_e ^ nl_l (level + 1) ^ ")"
 
 and pretty_print_binop (bop : bop) (e1 : expr) (e2 : expr) (level : int) :
     string =

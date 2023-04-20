@@ -12,7 +12,7 @@ open Ast
 %token <bool> BOOL
 %token TRUE
 %token FALSE
-%token <Ast.expr list> BOWL
+%token BOWL
 %token LBRAC
 %token RBRAC
 %token COMMA
@@ -20,6 +20,7 @@ open Ast
 %token FORK
 %token PIE
 %token TIMES
+%token CONS
 %token LPAREN
 %token RPAREN
 %token EOF
@@ -49,10 +50,18 @@ open Ast
 
 
 
+%left CONS
 
 (* higher precedence operators *)
 
 %start <Ast.expr> prog
+
+%{
+let rec desugar_list lst = 
+  match lst with
+  | [] -> Nil
+  | h :: t -> Binop (Cons, h, desugar_list t)
+%}
 
 %%
 
@@ -87,24 +96,19 @@ let_expr:
   ;
 
 ternary_expr:
-  | IF; p = expr; THEN; e1 = expr; ELSE; e2 = expr {Ternary (p, e1, e2)}
+  | IF; p = expr; THEN; e1 = expr; ELSE; e2 = expr { Ternary (p, e1, e2) }
   ;
 
 value:
   | i = CAL { Cal i }
   | f = JOUL { Joul f }
   | c = RCP { Rcp c }
-  // | s = Ing { Ing s }
-  // | SINGLE_QUOTE; c = ING; SINGLE_QUOTE { Ing c }
-  // | DOUBLE_QUOTE; s = RCP; DOUBLE_QUOTE { Rcp s }
   | iden = ID; { Identifier iden }
-
   | b = BOOL { Bool b }
   | PIE { Joul Float.pi }
   | TRUE { Bool true }
   | FALSE { Bool false }
-  | LBRAC; RBRAC { Bowl [] }
-  | LBRAC; l = BOWL; RBRAC { Bowl l }
+  | LBRAC; elts = separated_list(COMMA, value); RBRAC { Bowl (desugar_list elts) }
   | f = function_value {f}
   | a = function_app {a}
   ;
@@ -113,5 +117,5 @@ function_value:
   ;
 
 function_app:
-  | e1 = expr; e2 = expr {FunctionApp (e1, e2)}
+  | e1 = expr; e2 = expr { FunctionApp (e1, e2) }
 ;

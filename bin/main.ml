@@ -24,7 +24,7 @@ let rec take_commands p =
             take_commands p)
 
 and show_eval prs =
-  match Interp.Main.(pretty_print (eval prs) 1) with
+  match Interp.Main.(prs |> eval |> string_of_val) with
   | exception End_of_file -> Stdlib.exit 0
   | exception e ->
       print_string "Error: ";
@@ -40,7 +40,8 @@ and ustring_commands p = function
          #quit : quits session \n\
          #mode [x] : changes display mode (0 = evaluate & parse, 1 = evaluate, \
          2 = parse)\n\
-         #clear : clears all text from the screen \n\n";
+         #clear : clears all text from the screen\n\
+         #re : relaunches ustove \n\n";
       take_commands p
   | "mode 0" ->
       print_endline "mode 0 set\n";
