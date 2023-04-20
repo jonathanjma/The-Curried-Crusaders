@@ -24,7 +24,7 @@ let rec string_of_val (e : expr) : string =
   match e with
   | Cal c -> string_of_int c
   | Joul j -> string_of_float j
-  | Rcp s -> s
+  | Rcp s -> "\"" ^ s ^ "\""
   | Bool b -> string_of_bool b
   | Bowl b -> (
       match b with
