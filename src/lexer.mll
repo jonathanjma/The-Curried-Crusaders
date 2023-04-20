@@ -30,6 +30,11 @@ rule read =
   | "false" { FALSE }
   | "[" { LBRAC }
   | "]" { RBRAC }
+  | ">" { GREATER }
+  | "<" { LESS }
+  | ">=" { GEQ }
+  | "<=" { LEQ }
+  | "=" { EQUAL }
   | "," { COMMA }
   | "PIE" { PIE }
   | "cook" { COOK }

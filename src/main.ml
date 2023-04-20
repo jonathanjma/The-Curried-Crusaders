@@ -72,6 +72,11 @@ and step_binop bop e1 e2 =
   | Subtract, e1, e2 -> handleIntAndFloatOp (e1, e2) ( - ) ( -. )
   | Divide, e1, e2 -> handleIntAndFloatOp (e1, e2) ( / ) ( /. )
   | Add, a, b -> handleAdd (a, b)
+  | Greater, e1, e2 -> handleComparison (e1, e2) ( > )
+  | Less, e1, e2 -> handleComparison (e1, e2) ( < )
+  | Leq, e1, e2 -> handleComparison (e1, e2) ( <= )
+  | Geq, e1, e2 -> handleComparison (e1, e2) ( >= )
+  | Equal, e1, e2 -> handleComparison (e1, e2) ( = )
   | _ -> failwith "Type error: those types do not work the binary operator"
 
 and handleIntAndFloatOp (e1, e2) intOp floatOp =
@@ -80,6 +85,14 @@ and handleIntAndFloatOp (e1, e2) intOp floatOp =
   | Cal a, Joul b -> Joul (floatOp (float_of_int a) b)
   | Joul a, Cal b -> Joul (floatOp a (float_of_int b))
   | Joul a, Joul b -> Joul (floatOp a b)
+  | _ -> failwith "Precondition violated"
+
+and handleComparison (e1, e2) (compOp : 'a -> 'a -> bool) =
+  match (e1, e2) with
+  | Cal a, Cal b -> Bool (compOp (float_of_int a) (float_of_int b))
+  | Cal a, Joul b -> Bool (compOp (float_of_int a) b)
+  | Joul a, Cal b -> Bool (compOp a (float_of_int b))
+  | Joul a, Joul b -> Bool (compOp a b)
   | _ -> failwith "Precondition violated"
 
 and handleAdd (e1, e2) =
