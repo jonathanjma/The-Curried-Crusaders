@@ -32,6 +32,7 @@ let rec string_of_val (e : expr) : string =
       | _ -> "[" ^ string_of_bowl b ^ "]")
   | Nil -> "[]"
   | Binop _ -> failwith "string of val Precondition violated"
+  | Function (p, e1) -> failwith "String of function unimplemented"
   | _ -> failwith "string of val Unimplemented"
 
 and string_of_bowl b =
@@ -47,8 +48,9 @@ and string_of_bowl b =
 (** [is_value e] returns whether or not [e] is a value. *)
 let is_value (e : expr) : bool =
   match e with
-  | Cal _ | Joul _ | Rcp _ | LetExpression _ | Bool _ | Bowl _ -> true
-  | Binop _ | Ternary _ | Unop _ -> false
+  | Cal _ | Joul _ | Rcp _ | LetExpression _ | Bool _ | Bowl _ | Function _ ->
+      true
+  | Binop _ | Ternary _ | Unop _ | FunctionApp _ -> false
   | _ -> failwith "Unimplemented"
 
 (** [step e] takes some expression e and computes a step of evaluation of [e] *)
@@ -56,6 +58,8 @@ let rec step : expr -> expr = function
   | Cal _ -> failwith "Doesn't step"
   | Joul _ -> failwith "Doesn't step"
   | Rcp _ -> failwith "Doesn't step"
+  | Function _ -> failwith "Doesn't step"
+  | FunctionApp (e1, e2) -> step_funcapp e1 e2 (* TODO add env *)
   | Unop (op, e1) -> step_unop op e1
   | Binop (bop, e1, e2) when is_value e1 && is_value e2 -> step_binop bop e1 e2
   | Binop (bop, e1, e2) when is_value e1 -> Binop (bop, e1, step e2)
@@ -108,6 +112,14 @@ and handleAdd (e1, e2) =
   | Ing a, Rcp b -> Rcp (a ^ b)
   | _ -> handleIntAndFloatOp (e1, e2) ( + ) ( +. )
 
+(** First evaluate [e2] to a value [v1]. Then bind [param] to [v1] in [env],
+    call that resulting environment [env']. Finally, evaluate [e1] in [env'] *)
+and step_funcapp e1 e2 env =
+  match e1 with
+  (* e2 gets stepped to some value v1, then v1 is bind to [param] in env *)
+  | Function (param, f) -> failwith "Unimplemented step_funcapp"
+  | _ -> failwith "Type error"
+
 (* [step_ternary b1 e1 e2] steps a ternary expression, such that if [b1] is
    true, the expression evaluates to [step e1], and [step e2] if [b1] is false.
    If [b1] is not a boolean type, then the expression fails.*)
@@ -132,6 +144,9 @@ and step_unop op e1 =
         | Joul b -> Joul ~-.b
         | _ -> failwith "Type error"
       else Unop (Unegation, step e1)
+
+(** Find the binding for [id] in enviornment [env] *)
+and step_identifier id env = failwith "Unimplemented step identifier."
 
 (** [eval e] evaluates [e] to some value [v]. *)
 let rec eval (e : expr) : expr = if is_value e then e else e |> step |> eval
