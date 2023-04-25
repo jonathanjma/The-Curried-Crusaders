@@ -52,15 +52,15 @@ let is_value (e : expr) : bool =
   | _ -> failwith "Unimplemented"
 
 (** [step e] takes some expression e and computes a step of evaluation of [e] *)
-let rec step : expr -> expr = function
+let rec step (expression: expr) (env: Env.t) = match expression with
   | Cal _ -> failwith "Doesn't step"
   | Joul _ -> failwith "Doesn't step"
   | Rcp _ -> failwith "Doesn't step"
-  | Unop (op, e1) -> step_unop op e1
+  | Unop (op, e1) -> step_unop op e1 env
   | Binop (bop, e1, e2) when is_value e1 && is_value e2 -> step_binop bop e1 e2
-  | Binop (bop, e1, e2) when is_value e1 -> Binop (bop, e1, step e2)
-  | Binop (bop, e1, e2) -> Binop (bop, step e1, e2)
-  | Ternary (b1, e1, e2) -> step_ternary b1 e1 e2
+  | Binop (bop, e1, e2) when is_value e1 -> Binop (bop, e1, step e2 env)
+  | Binop (bop, e1, e2) -> Binop (bop, step e1 env, e2)
+  | Ternary (b1, e1, e2) -> step_ternary b1 e1 e2 env
   | _ -> failwith "Unimplemented"
 
 (* [step_binop bop e1 e2] steps a binary operator that contains an operator and
@@ -98,19 +98,19 @@ and handleAdd (e1, e2) =
 (* [step_ternary b1 e1 e2] steps a ternary expression, such that if [b1] is
    true, the expression evaluates to [step e1], and [step e2] if [b1] is false.
    If [b1] is not a boolean type, then the expression fails.*)
-and step_ternary b1 e1 e2 =
+and step_ternary b1 e1 e2 (env: Env.t)=
   match b1 with
   | Bool b ->
-      if b then if is_value e1 then e1 else step e1
+      if b then if is_value e1 then e1 else step e1 env
       else if is_value e2 then e2
-      else step e2
+      else step e2 env
   | b when is_value b ->
       (* b is a non-bolean value *)
       failwith
         "Type error: ternary expression must have boolean condition type."
-  | _ -> step_ternary (step b1) e1 e2
+  | _ -> step_ternary (step b1 env) e1 e2 env
 
-and step_unop op e1 =
+and step_unop op e1 (env: Env.t)=
   match op with
   | Unegation ->
       if is_value e1 then
@@ -118,12 +118,13 @@ and step_unop op e1 =
         | Cal a -> Cal ~-a
         | Joul b -> Joul ~-.b
         | _ -> failwith "Type error"
-      else Unop (Unegation, step e1)
+      else Unop (Unegation, step e1 env)
 
 (** [eval e] evaluates [e] to some value [v]. *)
-let rec eval (e : expr) : expr = if is_value e then e else e |> step |> eval
+let rec eval (env: Env.t) (e : expr) : expr = if is_value e then e else eval env (step e env)
+let eval_wrapper (e: expr) : expr = eval Env.empty e
 
-let interp (s : string) : string = s |> parse |> eval |> string_of_val
+let interp (s : string) : string = s |> parse |> eval Env.empty|> string_of_val
 let nl_l (level : int) : string = "\n" ^ String.make level ' '
 
 let pretty_print_value (label : string) (f : 'a -> string) (value : 'a) : string
