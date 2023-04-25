@@ -1,7 +1,15 @@
 open Ast
 
 type t
-type binding_value
+
+type binding_value =
+  | CalValue of int
+  | JoulValue of float
+  | RcpValue of string
+  | IngValue of string
+  | BoolValue of bool
+  | BowlValue of binding_value list
+  | FunctionClosureValue of t * string * expr
 
 val empty : t (* an environment with no bindings *)
 val remove_binding : string -> t -> t

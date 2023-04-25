@@ -24,7 +24,7 @@ let rec take_commands p =
             take_commands p)
 
 and show_eval prs =
-  match Interp.Main.(prs |> eval |> string_of_val) with
+  match Interp.Main.(prs |> eval Interp.Env.empty |> string_of_val) with
   | exception End_of_file -> Stdlib.exit 0
   | exception e ->
       print_string "Error: ";
