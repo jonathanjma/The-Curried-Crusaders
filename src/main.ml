@@ -121,13 +121,6 @@ and step_unop op e1 (env : Env.t) =
       else Unop (Unegation, fst (step e1 env))
 
 (** [eval e] evaluates [e] to some value [v]. *)
-let rec eval (env : Env.t) (e : expr) : expr =
-  if is_value e then e
-  else
-    let expr_after_step, env_after_step = step e env in
-    eval env_after_step expr_after_step
-
-let eval_wrapper (e : expr) : expr = eval Env.empty e
 
 let rec string_of_val (e : expr) : string =
   match e with
@@ -153,7 +146,6 @@ and string_of_bowl b =
   in
   string_of_bowl_tr "" b
 
-let interp (s : string) : string = s |> parse |> eval Env.empty |> string_of_val
 let nl_l (level : int) : string = "\n" ^ String.make level ' '
 
 let pretty_print_value (label : string) (f : 'a -> string) (value : 'a) : string
@@ -238,3 +230,16 @@ and pretty_print_ternary (p : expr) (e1 : expr) (e2 : expr) (level : int) =
   let end_paren_string : string = nl_l (level + 1) ^ ")" in
   "Ternary (\n" ^ p_string ^ ",\n" ^ e1_string ^ ",\n" ^ e2_string ^ ""
   ^ end_paren_string
+
+let rec eval (env : Env.t) (e : expr) : expr =
+  if is_value e then e
+  else
+    let expr_after_step, env_after_step = step e env in
+
+    env |> Env.to_string |> ( ^ ) "environment: " |> print_endline;
+    print_endline (pretty_print expr_after_step 0);
+
+    eval env_after_step expr_after_step
+
+let eval_wrapper (e : expr) : expr = eval Env.empty e
+let interp (s : string) : string = s |> parse |> eval Env.empty |> string_of_val
