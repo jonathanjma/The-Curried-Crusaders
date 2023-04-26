@@ -9,7 +9,7 @@ let rec take_commands p =
       else
         match
           let parsed = Interp.Main.parse x in
-          Interp.Main.pretty_print parsed 1
+          Interp.Print.pretty_print parsed 1
         with
         | exception End_of_file -> Stdlib.exit 0
         | exception e ->
