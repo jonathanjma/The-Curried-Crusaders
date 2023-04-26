@@ -1,17 +1,15 @@
 open Ast
 
 type binding_value =
-  | CalValue of int
-  | JoulValue of float
-  | RcpValue of string
-  | IngValue of string
-  | BoolValue of bool
-  | BowlValue of binding_value list
+  | StandardValue of expr
   | FunctionClosureValue of t * string * expr
 
 (* a closure represents the state of the environment at a certain time in the
    program's execution*)
 and t = (string * binding_value) list
+
+let make_standard_binding_value (e: expr) = StandardValue e
+
 
 let empty = [] (* the empty environment *)
 

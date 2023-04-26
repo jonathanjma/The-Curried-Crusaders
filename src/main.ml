@@ -1,4 +1,5 @@
 open Ast
+open Env
 
 exception Error of string
 
@@ -20,35 +21,15 @@ let parse (s : string) : expr =
         (Error (Printf.sprintf "%s: syntax error" (print_error_position lexbuf)))
 
 (** [string_of_val e] converts [e] to a string.contents Requires: [e] is a value *)
-let rec string_of_val (e : expr) : string =
-  match e with
-  | Cal c -> string_of_int c
-  | Joul j -> string_of_float j
-  | Rcp s -> "\"" ^ s ^ "\""
-  | Bool b -> string_of_bool b
-  | Bowl b -> (
-      match b with
-      | Nil -> "[]"
-      | _ -> "[" ^ string_of_bowl b ^ "]")
-  | Nil -> "[]"
-  | Binop _ -> failwith "string of val Precondition violated"
-  | _ -> failwith "string of val Unimplemented"
 
-and string_of_bowl b =
-  let rec string_of_bowl_tr acc = function
-    | Nil -> acc
-    | Binop (_, h, t) ->
-        if t = Nil then acc ^ string_of_val h
-        else string_of_bowl_tr (acc ^ string_of_val h ^ ", ") t
-    | _ -> failwith "Precondition violated"
-  in
-  string_of_bowl_tr "" b
+
+
 
 (** [is_value e] returns whether or not [e] is a value. *)
 let is_value (e : expr) : bool =
   match e with
-  | Cal _ | Joul _ | Rcp _ | LetExpression _ | Bool _ | Bowl _ -> true
-  | Binop _ | Ternary _ | Unop _ -> false
+  | Cal _ | Joul _ | Rcp _ | Bool _ | Bowl _ -> true
+  | Binop _ | Ternary _ | Unop _ | LetExpression _ | Identifier _ -> false
   | _ -> failwith "Unimplemented"
 
 (** [step e] takes some expression e and computes a step of evaluation of [e] *)
@@ -61,10 +42,28 @@ let rec step (expression: expr) (env: Env.t) = match expression with
   | Binop (bop, e1, e2) when is_value e1 -> Binop (bop, e1, step e2 env)
   | Binop (bop, e1, e2) -> Binop (bop, step e1 env, e2)
   | Ternary (b1, e1, e2) -> step_ternary b1 e1 e2 env
-  | _ -> failwith "Unimplemented"
+  | LetExpression (name, e1, e2) when is_value e1 ->
+    let new_env: Env.t = Env.add_binding name (Env.make_standard_binding_value e1) env in
+    step_let_expression new_env e2
+  | LetExpression (name, e1, e2) -> 
+    let new_expr: expr = LetExpression (name, step e1 env, e2) in
+    step new_expr env
+  | Identifier name -> (
+    match Env.get_binding name env with 
+  
+    | None -> failwith ("unbound identifier" ^ name)
+    | Some (StandardValue v) -> v
+    | _ -> failwith "unimplemented"
+
+  )
+
+  
+  | _ -> failwith "unimplemented"
 
 (* [step_binop bop e1 e2] steps a binary operator that contains an operator and
    two values. Requires: [e1] and [e2] are values. *)
+
+and step_let_expression (env: Env.t) (body: expr) = if is_value body then body else step body env
 and step_binop bop e1 e2 =
   match (bop, e1, e2) with
   | Mult, e1, e2 -> handleIntAndFloatOp (e1, e2) ( * ) ( *. )
@@ -123,6 +122,32 @@ and step_unop op e1 (env: Env.t)=
 (** [eval e] evaluates [e] to some value [v]. *)
 let rec eval (env: Env.t) (e : expr) : expr = if is_value e then e else eval env (step e env)
 let eval_wrapper (e: expr) : expr = eval Env.empty e
+
+
+let rec string_of_val (e : expr) : string =
+  match e with
+  | Cal c -> string_of_int c
+  | Joul j -> string_of_float j
+  | Rcp s -> "\"" ^ s ^ "\""
+  | Bool b -> string_of_bool b
+  | Bowl b -> (
+      match b with
+      | Nil -> "[]"
+      | _ -> "[" ^ string_of_bowl b ^ "]")
+  | Nil -> "[]"
+  | Binop _ -> failwith "string of val Precondition violated"
+  | _ -> failwith "string of val Unimplemented"
+
+
+  and string_of_bowl b =
+  let rec string_of_bowl_tr acc = function
+    | Nil -> acc
+    | Binop (_, h, t) ->
+        if t = Nil then acc ^ string_of_val h
+        else string_of_bowl_tr (acc ^ string_of_val h ^ ", ") t
+    | _ -> failwith "Precondition violated"
+  in
+  string_of_bowl_tr "" b
 
 let interp (s : string) : string = s |> parse |> eval Env.empty|> string_of_val
 let nl_l (level : int) : string = "\n" ^ String.make level ' '
@@ -209,3 +234,5 @@ and pretty_print_ternary (p : expr) (e1 : expr) (e2 : expr) (level : int) =
   let end_paren_string : string = nl_l (level + 1) ^ ")" in
   "Ternary (\n" ^ p_string ^ ",\n" ^ e1_string ^ ",\n" ^ e2_string ^ ""
   ^ end_paren_string
+
+
