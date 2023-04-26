@@ -148,6 +148,11 @@ let string_of_bop = function
   | Ast.Subtract -> "-"
   | Ast.Divide -> "/"
   | Ast.Cons -> "::"
+  | Ast.Geq -> ">="
+  | Ast.Leq -> "<="
+  | Ast.Equal -> "="
+  | Ast.Greater -> ">"
+  | Ast.Less -> "<"
 
 let random_parse_binop_tests (tests : int) =
   let rec random_parse_binop_tests (tests : int) (acc : test list) =
