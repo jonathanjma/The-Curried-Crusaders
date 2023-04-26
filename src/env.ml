@@ -15,7 +15,7 @@ and t = (string * binding_value) list
 
 let empty = [] (* the empty environment *)
 
-let rec remove_binding (binding_name : string) (env : t) : t =
+let remove_binding (binding_name : string) (env : t) : t =
   List.filter (fun (n, _) -> not (n = binding_name)) env
 
 let add_binding (binding_name : string) (binding_value : binding_value)

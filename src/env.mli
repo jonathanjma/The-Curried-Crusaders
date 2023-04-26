@@ -1,5 +1,3 @@
-open Ast
-
 type t
 type binding_value
 
