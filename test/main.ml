@@ -65,12 +65,13 @@ let eval_float_tests =
 
 let eval_string_tests =
   [
-    eval_string_expression_test "\"a\" should parse to a" "a" "\"a\"";
+    eval_string_expression_test "\"a\" should parse to \"a\"" "\"a\"" "\"a\"";
     eval_string_expression_test "\"abcde\" + \"a\" should parse to abcdea"
-      "abcdea" "\"abcde\" + \"a\"";
-    eval_string_expression_test "\"a\" + 1 should parse to a1" "a1" "\"a\" + 1";
-    eval_autonamed_string_expression_test "2a31" "1 + 1 + \"a\" + 3 + 1";
-    eval_autonamed_string_expression_test "2.a1.110"
+      "\"abcdea\"" "\"abcde\" + \"a\"";
+    eval_string_expression_test "\"a\" + 1 should parse to a1" "\"a1\""
+      "\"a\" + 1";
+    eval_autonamed_string_expression_test "\"2a31\"" "1 + 1 + \"a\" + 3 + 1";
+    eval_autonamed_string_expression_test "\"2.a1.110\""
       "2.0 + \"a\" +  1.1  + \"1\" + 0";
     eval_autonamed_string_expression_test
       ("so true that PI(E) = " ^ string_of_float Float.pi)

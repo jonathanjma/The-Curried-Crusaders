@@ -41,6 +41,7 @@ let rec big_step (expression, env) : expr * Env.t =
   | Cal _ -> (expression, env)
   | Joul _ -> (expression, env)
   | Rcp _ -> (expression, env)
+  | Bool _ -> (expression, env)
   | Unop (op, e1) -> big_step (step_unop op e1 env, env)
   | Binop (bop, e1, e2) ->
       let v1, _ = big_step (e1, env) in
@@ -58,7 +59,7 @@ let rec big_step (expression, env) : expr * Env.t =
       match f with
       | Function (p, e) -> big_step (LetExpression (p, e2, e), env)
       | _ -> failwith "Type error")
-  | _ -> failwith "step expression unimplemented"
+  | _ -> failwith "unmatched big_step"
 
 (* [step_binop bop e1 e2] steps a binary operator that contains an operator and
    two values. Requires: [e1] and [e2] are values. *)
