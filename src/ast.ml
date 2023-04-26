@@ -6,6 +6,11 @@ type bop =
   | Subtract
   | Divide
   | Cons
+  | Greater
+  | Less
+  | Leq
+  | Geq
+  | Equal
 
 (** The type of unary operators *)
 type unop = Unegation  (** The type of the abstract syntax tree (AST). *)
@@ -18,6 +23,11 @@ let bop_to_string : bop -> string = function
   | Divide -> "DIVIDE"
   | Subtract -> "SUBTRACT"
   | Cons -> "CONS"
+  | Greater -> "GREATER"
+  | Less -> "LESS"
+  | Leq -> "LEQ"
+  | Geq -> "GEQ"
+  | Equal -> "EQUAL"
 
 let unop_to_string : unop -> string = function
   | Unegation -> "UNEGATION"

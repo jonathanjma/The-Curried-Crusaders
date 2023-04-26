@@ -12,7 +12,7 @@ let make_standard_binding_value (e : expr) = StandardValue e
 let empty = [] (* the empty environment *)
 
 let rec remove_binding (binding_name : string) (env : t) : t =
-  List.filter (fun (n, _) -> not (n = binding_name)) env
+  List.filter (fun (n, _) -> n <> binding_name) env
 
 let add_binding (binding_name : string) (binding_value : binding_value)
     (env : t) =

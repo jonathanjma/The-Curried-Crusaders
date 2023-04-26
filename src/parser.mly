@@ -27,6 +27,11 @@ open Ast
 %token DIVIDE
 %token SUBTRACT
 %token UNEGATION
+%token GREATER
+%token LESS
+%token GEQ
+%token LEQ
+%token EQUAL
 
 %token DOUBLE_QUOTE
 %token SINGLE_QUOTE
@@ -45,8 +50,14 @@ open Ast
 
 %left FORK
 
+
+%left EQUAL
+%left GREATER LESS GEQ LEQ
+
 %left PLUS SUBTRACT 
 %left TIMES DIVIDE
+
+%right UNEGATION
 
 
 
@@ -71,6 +82,11 @@ let rec desugar_list lst =
 | SUBTRACT { Subtract }
 | TIMES { Mult }
 | DIVIDE { Divide }
+| GREATER { Greater }
+| LESS { Less }
+| EQUAL { Equal }
+| LEQ { Leq }
+| GEQ { Geq }
 
 prog:
   | e = expr; EOF { e }
@@ -84,6 +100,11 @@ expr:
   | e1 = expr; TIMES; e2 = expr { Binop (Mult, e1, e2) }
   | e1 = expr; DIVIDE; e2 = expr { Binop (Divide, e1, e2) }
   | e1 = expr; SUBTRACT; e2 = expr { Binop (Subtract, e1, e2) }
+  | e1 = expr; EQUAL; e2 = expr { Binop (Equal, e1, e2) }
+  | e1 = expr; GEQ; e2 = expr { Binop (Geq, e1, e2) }
+  | e1 = expr; LEQ; e2 = expr { Binop (Leq, e1, e2) }
+  | e1 = expr; LESS; e2 = expr { Binop (Less, e1, e2) }
+  | e1 = expr; GREATER; e2 = expr { Binop (Greater, e1, e2) }
   | UNEGATION; e1 = expr { Unop (Unegation, e1) }
   | LPAREN; e = expr; RPAREN { e }
   | l_e = let_expr { l_e }
