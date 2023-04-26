@@ -42,16 +42,12 @@ let rec big_step (expression, env) : expr * Env.t =
   | Joul _ -> (expression, env)
   | Rcp _ -> (expression, env)
   | Unop (op, e1) -> big_step (step_unop op e1 env, env)
-  | Binop (bop, e1, e2) when is_value e1 && is_value e2 ->
-      big_step (step_binop bop e1 e2, env)
-  | Binop (bop, e1, e2) when is_value e1 ->
-      let e2_after_step, env_after_step = big_step (e2, env) in
-      big_step (Binop (bop, e1, e2_after_step), env_after_step)
   | Binop (bop, e1, e2) ->
-      let e1_after_step, env_after_step = big_step (e1, env) in
-      big_step (Binop (bop, e1_after_step, e2), env)
+      let v1, _ = big_step (e1, env) in
+      let v2, _ = big_step (e2, env) in
+      big_step (step_binop bop v1 v2, env)
   | Ternary (b1, e1, e2) -> big_step (step_ternary b1 e1 e2 env, env)
-  | LetExpression (name, e1, e2) when is_value e1 ->
+  | LetExpression (name, e1, e2) ->
       let v1, _ = big_step (e1, env) in
       let new_env : Env.t =
         Env.add_binding name (Env.make_standard_binding_value v1) env
