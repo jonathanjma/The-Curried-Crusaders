@@ -60,7 +60,6 @@ let rec step (expression : expr) (env : Env.t) : expr * Env.t =
    two values. Requires: [e1] and [e2] are values. *)
 
 and step_binop bop e1 e2 =
-  print_endline "stepping binop";
   match (bop, e1, e2) with
   | Mult, e1, e2 -> handleIntAndFloatOp (e1, e2) ( * ) ( *. )
   | Fork, Cal a, Cal b -> Cal (Int.logxor a b)
@@ -70,13 +69,9 @@ and step_binop bop e1 e2 =
   | _ -> failwith "Type error: those types do not work the binary operator"
 
 and step_identifier name env =
-  print_endline ("stepping identifier: " ^ name);
-  env |> Env.to_string |> print_endline;
   match Env.get_binding name env with
   | None -> failwith ("unbound identifier: " ^ name)
-  | Some (StandardValue v) ->
-      print_endline "found";
-      v
+  | Some (StandardValue v) -> v
   | _ -> failwith "unimplemented"
 
 and handleIntAndFloatOp (e1, e2) intOp floatOp =
@@ -127,8 +122,6 @@ and step_unop op e1 (env : Env.t) =
 
 (** [eval e] evaluates [e] to some value [v]. *)
 let rec eval (env : Env.t) (e : expr) : expr =
-  print_endline "KAEJGKAJEGJGE";
-  print_endline (to_string env);
   if is_value e then e
   else
     let expr_after_step, env_after_step = step e env in
