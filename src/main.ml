@@ -1,5 +1,6 @@
 open Ast
 open Env
+open Print
 
 exception Error of string
 
@@ -35,33 +36,31 @@ let is_value (e : expr) : bool =
   | _ -> failwith "is_value: Unimplemented"
 
 (** [step e] takes some expression [e] and computes a step of evaluation of [e] *)
-let rec step (expression : expr) (env : Env.t) : expr * Env.t =
+let rec big_step (expression, env) : expr * Env.t =
   match expression with
-  | Cal _ -> failwith "Doesn't step"
-  | Joul _ -> failwith "Doesn't step"
-  | Rcp _ -> failwith "Doesn't step"
-  | Unop (op, e1) -> (step_unop op e1 env, env)
+  | Cal _ -> (expression, env)
+  | Joul _ -> (expression, env)
+  | Rcp _ -> (expression, env)
+  | Unop (op, e1) -> big_step (step_unop op e1 env, env)
   | Binop (bop, e1, e2) when is_value e1 && is_value e2 ->
-      (step_binop bop e1 e2, env)
+      big_step (step_binop bop e1 e2, env)
   | Binop (bop, e1, e2) when is_value e1 ->
-      let e2_after_step, env_after_step = step e2 env in
-      (Binop (bop, e1, e2_after_step), env_after_step)
+      let e2_after_step, env_after_step = big_step (e2, env) in
+      big_step (Binop (bop, e1, e2_after_step), env_after_step)
   | Binop (bop, e1, e2) ->
-      let e1_after_step, env_after_step = step e1 env in
-      (Binop (bop, e1_after_step, e2), env)
-  | Ternary (b1, e1, e2) -> (step_ternary b1 e1 e2 env, env)
+      let e1_after_step, env_after_step = big_step (e1, env) in
+      big_step (Binop (bop, e1_after_step, e2), env)
+  | Ternary (b1, e1, e2) -> big_step (step_ternary b1 e1 e2 env, env)
   | LetExpression (name, e1, e2) when is_value e1 ->
+      let v1, _ = big_step (e1, env) in
       let new_env : Env.t =
-        Env.add_binding name (Env.make_standard_binding_value e1) env
+        Env.add_binding name (Env.make_standard_binding_value v1) env
       in
-      (e2, new_env)
-  | LetExpression (name, e1, e2) ->
-      let e1_after_step, env_after_step = step e1 env in
-      (LetExpression (name, e1_after_step, e2), env_after_step)
-  | Identifier name -> (step_identifier name env, env)
+      big_step (e2, new_env)
+  | Identifier name -> big_step (step_identifier name env, env)
   | FunctionApp (f, e2) -> (
       match f with
-      | Function (p, e) -> step (LetExpression (p, e2, e)) env
+      | Function (p, e) -> big_step (LetExpression (p, e2, e), env)
       | _ -> failwith "Type error")
   | _ -> failwith "step expression unimplemented"
 
@@ -110,14 +109,14 @@ and handleAdd (e1, e2) =
 and step_ternary b1 e1 e2 (env : Env.t) =
   match b1 with
   | Bool b ->
-      if b then if is_value e1 then e1 else fst (step e1 env)
+      if b then if is_value e1 then e1 else fst (big_step (e1, env))
       else if is_value e2 then e2
-      else fst (step e2 env)
+      else fst (big_step (e2, env))
   | b when is_value b ->
       (* b is a non-bolean value *)
       failwith
         "Type error: ternary expression must have boolean condition type."
-  | _ -> step_ternary (fst (step b1 env)) e1 e2 env
+  | _ -> step_ternary (fst (big_step (b1, env))) e1 e2 env
 
 and step_unop op e1 (env : Env.t) =
   match op with
@@ -127,13 +126,13 @@ and step_unop op e1 (env : Env.t) =
         | Cal a -> Cal ~-a
         | Joul b -> Joul ~-.b
         | _ -> failwith "Type error"
-      else Unop (Unegation, fst (step e1 env))
+      else Unop (Unegation, fst (big_step (e1, env)))
 
 (** [eval e] evaluates [e] to some value [v]. *)
 let rec eval (env : Env.t) (e : expr) : expr =
   if is_value e then e
   else
-    let expr_after_step, env_after_step = step e env in
+    let expr_after_step, env_after_step = big_step (e, env) in
     eval env_after_step expr_after_step
 
 let eval_wrapper (e : expr) : expr = eval Env.empty e
@@ -163,16 +162,6 @@ and string_of_bowl b =
   string_of_bowl_tr "" b
 
 let interp (s : string) : string = s |> parse |> eval Env.empty |> string_of_val
-
-let rec eval (env : Env.t) (e : expr) : expr =
-  if is_value e then e
-  else
-    let expr_after_step, env_after_step = step e env in
-
-    env |> Env.to_string |> ( ^ ) "environment: " |> print_endline;
-    print_endline (pretty_print expr_after_step 0);
-
-    eval env_after_step expr_after_step
-
+let rec eval (env : Env.t) (e : expr) : expr = fst (big_step (e, env))
 let eval_wrapper (e : expr) : expr = eval Env.empty e
 let interp (s : string) : string = s |> parse |> eval Env.empty |> string_of_val

@@ -27,17 +27,13 @@ let rec to_string_h : t -> string = function
 let to_string : t -> string = fun (env : t) -> "[" ^ to_string_h env ^ "]"
 
 let rec get_binding (binding_name : string) (env : t) : binding_value option =
-  env |> to_string |> print_endline;
   match env with
   | [] -> None
   | (name, value) :: remaining_bindings ->
       if name = binding_name then
         let () =
           match value with
-          | StandardValue (Cal n) ->
-              print_endline "GOT CAL";
-              print_int n;
-              print_endline ""
+          | StandardValue (Cal n) -> print_endline ""
           | _ -> failwith "aa"
         in
 
