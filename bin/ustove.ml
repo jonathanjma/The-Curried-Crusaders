@@ -1,35 +1,35 @@
-(* mode = 0 - evaluate and parse; mode = 1 - evaluate, no parse; mode = 2 - parse only *)
+(* mode = 0 - evaluate and parse; mode = 1 - evaluate, no parse; mode = 2 -
+   parse only *)
 let rec take_commands mode =
   print_string "> ";
   match read_line () with
+  | exception End_of_file -> Stdlib.exit 0
   | "" -> take_commands mode
-  | x -> (
-      if String.get x 0 = '#' then
-        ustring_commands mode (String.sub x 1 (String.length x - 1))
+  | input -> (
+      if String.get input 0 = '#' then
+        ustring_commands mode (String.sub input 1 (String.length input - 1))
       else
-        match
-          let parsed = Interp.Main.parse x in
-          Interp.Print.pretty_print parsed 1
-        with
-        | exception End_of_file -> Stdlib.exit 0
+        match Interp.Main.parse input with
         | exception e ->
             print_string "Error: ";
             print_endline (Printexc.to_string e);
             print_endline "";
             take_commands mode
-        | y ->
-            if mode mod 2 = 0 then print_endline y;
-            if mode < 2 then show_eval (Interp.Main.parse x);
+        | parsed ->
+            (* show pretty printed AST *)
+            if mode mod 2 = 0 then
+              print_endline (Interp.Print.pretty_print parsed 1);
+            (* show evaluated result *)
+            if mode < 2 then show_eval parsed;
             print_endline "";
             take_commands mode)
 
-and show_eval prs =
-  match Interp.Main.(prs |> eval_wrapper |> string_of_val) with
-  | exception End_of_file -> Stdlib.exit 0
-  | exception e ->
+and show_eval parsed =
+  match Interp.Main.(parsed |> eval_wrapper |> string_of_val) with
+  | exception ex ->
       print_string "Error: ";
-      print_endline (Printexc.to_string e)
-  | x -> print_endline x
+      print_endline (Printexc.to_string ex)
+  | evaluated -> print_endline evaluated
 
 and ustring_commands p = function
   | "quit" -> Stdlib.exit 0
