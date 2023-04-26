@@ -8,9 +8,7 @@ type binding_value =
    program's execution*)
 and t = (string * binding_value) list
 
-let make_standard_binding_value (e: expr) = StandardValue e
-
-
+let make_standard_binding_value (e : expr) = StandardValue e
 let empty = [] (* the empty environment *)
 
 let rec remove_binding (binding_name : string) (env : t) : t =
@@ -27,3 +25,7 @@ let rec get_binding (binding_name : string) (env : t) : binding_value option =
   | (name, value) :: remaining_bindings ->
       if name = binding_name then Some value
       else get_binding binding_name remaining_bindings
+
+let rec to_string : t -> string = function
+  | [] -> ""
+  | (b, _) :: remainder -> "( " ^ b ^ " )" ^ to_string remainder

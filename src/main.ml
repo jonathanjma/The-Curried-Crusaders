@@ -22,9 +22,6 @@ let parse (s : string) : expr =
 
 (** [string_of_val e] converts [e] to a string.contents Requires: [e] is a value *)
 
-
-
-
 (** [is_value e] returns whether or not [e] is a value. *)
 let is_value (e : expr) : bool =
   match e with
@@ -33,38 +30,37 @@ let is_value (e : expr) : bool =
   | _ -> failwith "Unimplemented"
 
 (** [step e] takes some expression e and computes a step of evaluation of [e] *)
-let rec step (expression: expr) (env: Env.t) = match expression with
+let rec step (expression : expr) (env : Env.t) : expr * Env.t =
+  match expression with
   | Cal _ -> failwith "Doesn't step"
   | Joul _ -> failwith "Doesn't step"
   | Rcp _ -> failwith "Doesn't step"
-  | Unop (op, e1) -> step_unop op e1 env
-  | Binop (bop, e1, e2) when is_value e1 && is_value e2 -> step_binop bop e1 e2
-  | Binop (bop, e1, e2) when is_value e1 -> Binop (bop, e1, step e2 env)
-  | Binop (bop, e1, e2) -> Binop (bop, step e1 env, e2)
-  | Ternary (b1, e1, e2) -> step_ternary b1 e1 e2 env
+  | Unop (op, e1) -> (step_unop op e1 env, env)
+  | Binop (bop, e1, e2) when is_value e1 && is_value e2 ->
+      (step_binop bop e1 e2, env)
+  | Binop (bop, e1, e2) when is_value e1 ->
+      let e2_after_step, env_after_step = step e2 env in
+      (Binop (bop, e1, e2_after_step), env_after_step)
+  | Binop (bop, e1, e2) ->
+      let e1_after_step, env_after_step = step e1 env in
+      (Binop (bop, e1_after_step, e2), env)
+  | Ternary (b1, e1, e2) -> (step_ternary b1 e1 e2 env, env)
   | LetExpression (name, e1, e2) when is_value e1 ->
-    let new_env: Env.t = Env.add_binding name (Env.make_standard_binding_value e1) env in
-    step_let_expression new_env e2
-  | LetExpression (name, e1, e2) -> 
-    let new_expr: expr = LetExpression (name, step e1 env, e2) in
-    step new_expr env
-  | Identifier name -> (
-    match Env.get_binding name env with 
-  
-    | None -> failwith ("unbound identifier" ^ name)
-    | Some (StandardValue v) -> v
-    | _ -> failwith "unimplemented"
-
-  )
-
-  
+      let new_env : Env.t =
+        Env.add_binding name (Env.make_standard_binding_value e1) env
+      in
+      (e2, new_env)
+  | LetExpression (name, e1, e2) ->
+      let e1_after_step, env_after_step = step e1 env in
+      (LetExpression (name, e1_after_step, e2), env_after_step)
+  | Identifier name -> (step_identifier name env, env)
   | _ -> failwith "unimplemented"
 
 (* [step_binop bop e1 e2] steps a binary operator that contains an operator and
    two values. Requires: [e1] and [e2] are values. *)
 
-and step_let_expression (env: Env.t) (body: expr) = if is_value body then body else step body env
 and step_binop bop e1 e2 =
+  print_endline "stepping binop";
   match (bop, e1, e2) with
   | Mult, e1, e2 -> handleIntAndFloatOp (e1, e2) ( * ) ( *. )
   | Fork, Cal a, Cal b -> Cal (Int.logxor a b)
@@ -72,6 +68,16 @@ and step_binop bop e1 e2 =
   | Divide, e1, e2 -> handleIntAndFloatOp (e1, e2) ( / ) ( /. )
   | Add, a, b -> handleAdd (a, b)
   | _ -> failwith "Type error: those types do not work the binary operator"
+
+and step_identifier name env =
+  print_endline ("stepping identifier: " ^ name);
+  env |> Env.to_string |> print_endline;
+  match Env.get_binding name env with
+  | None -> failwith ("unbound identifier: " ^ name)
+  | Some (StandardValue v) ->
+      print_endline "found";
+      v
+  | _ -> failwith "unimplemented"
 
 and handleIntAndFloatOp (e1, e2) intOp floatOp =
   match (e1, e2) with
@@ -97,19 +103,19 @@ and handleAdd (e1, e2) =
 (* [step_ternary b1 e1 e2] steps a ternary expression, such that if [b1] is
    true, the expression evaluates to [step e1], and [step e2] if [b1] is false.
    If [b1] is not a boolean type, then the expression fails.*)
-and step_ternary b1 e1 e2 (env: Env.t)=
+and step_ternary b1 e1 e2 (env : Env.t) =
   match b1 with
   | Bool b ->
-      if b then if is_value e1 then e1 else step e1 env
+      if b then if is_value e1 then e1 else fst (step e1 env)
       else if is_value e2 then e2
-      else step e2 env
+      else fst (step e2 env)
   | b when is_value b ->
       (* b is a non-bolean value *)
       failwith
         "Type error: ternary expression must have boolean condition type."
-  | _ -> step_ternary (step b1 env) e1 e2 env
+  | _ -> step_ternary (fst (step b1 env)) e1 e2 env
 
-and step_unop op e1 (env: Env.t)=
+and step_unop op e1 (env : Env.t) =
   match op with
   | Unegation ->
       if is_value e1 then
@@ -117,12 +123,18 @@ and step_unop op e1 (env: Env.t)=
         | Cal a -> Cal ~-a
         | Joul b -> Joul ~-.b
         | _ -> failwith "Type error"
-      else Unop (Unegation, step e1 env)
+      else Unop (Unegation, fst (step e1 env))
 
 (** [eval e] evaluates [e] to some value [v]. *)
-let rec eval (env: Env.t) (e : expr) : expr = if is_value e then e else eval env (step e env)
-let eval_wrapper (e: expr) : expr = eval Env.empty e
+let rec eval (env : Env.t) (e : expr) : expr =
+  print_endline "KAEJGKAJEGJGE";
+  print_endline (to_string env);
+  if is_value e then e
+  else
+    let expr_after_step, env_after_step = step e env in
+    eval env_after_step expr_after_step
 
+let eval_wrapper (e : expr) : expr = eval Env.empty e
 
 let rec string_of_val (e : expr) : string =
   match e with
@@ -138,8 +150,7 @@ let rec string_of_val (e : expr) : string =
   | Binop _ -> failwith "string of val Precondition violated"
   | _ -> failwith "string of val Unimplemented"
 
-
-  and string_of_bowl b =
+and string_of_bowl b =
   let rec string_of_bowl_tr acc = function
     | Nil -> acc
     | Binop (_, h, t) ->
@@ -149,7 +160,7 @@ let rec string_of_val (e : expr) : string =
   in
   string_of_bowl_tr "" b
 
-let interp (s : string) : string = s |> parse |> eval Env.empty|> string_of_val
+let interp (s : string) : string = s |> parse |> eval Env.empty |> string_of_val
 let nl_l (level : int) : string = "\n" ^ String.make level ' '
 
 let pretty_print_value (label : string) (f : 'a -> string) (value : 'a) : string
@@ -234,5 +245,3 @@ and pretty_print_ternary (p : expr) (e1 : expr) (e2 : expr) (level : int) =
   let end_paren_string : string = nl_l (level + 1) ^ ")" in
   "Ternary (\n" ^ p_string ^ ",\n" ^ e1_string ^ ",\n" ^ e2_string ^ ""
   ^ end_paren_string
-
-
