@@ -25,11 +25,16 @@ let parse (s : string) : expr =
 (** [is_value e] returns whether or not [e] is a value. *)
 let is_value (e : expr) : bool =
   match e with
-  | Cal _ | Joul _ | Rcp _ | Bool _ | Bowl _ -> true
-  | Binop _ | Ternary _ | Unop _ | LetExpression _ | Identifier _ -> false
-  | _ -> failwith "Unimplemented"
+  | Cal _ | Joul _ | Rcp _ | Bool _ | Bowl _ | Function _ -> true
+  | Binop _
+  | Ternary _
+  | Unop _
+  | LetExpression _
+  | Identifier _
+  | FunctionApp _ -> false
+  | _ -> failwith "is_value: Unimplemented"
 
-(** [step e] takes some expression e and computes a step of evaluation of [e] *)
+(** [step e] takes some expression [e] and computes a step of evaluation of [e] *)
 let rec step (expression : expr) (env : Env.t) : expr * Env.t =
   match expression with
   | Cal _ -> failwith "Doesn't step"
@@ -54,7 +59,11 @@ let rec step (expression : expr) (env : Env.t) : expr * Env.t =
       let e1_after_step, env_after_step = step e1 env in
       (LetExpression (name, e1_after_step, e2), env_after_step)
   | Identifier name -> (step_identifier name env, env)
-  | _ -> failwith "unimplemented"
+  | FunctionApp (f, e2) -> (
+      match f with
+      | Function (p, e) -> step (LetExpression (p, e2, e)) env
+      | _ -> failwith "Type error")
+  | _ -> failwith "step expression unimplemented"
 
 (* [step_binop bop e1 e2] steps a binary operator that contains an operator and
    two values. Requires: [e1] and [e2] are values. *)
@@ -72,7 +81,7 @@ and step_identifier name env =
   match Env.get_binding name env with
   | None -> failwith ("unbound identifier: " ^ name)
   | Some (StandardValue v) -> v
-  | _ -> failwith "unimplemented"
+  | _ -> failwith "step_identifier precondition violated"
 
 and handleIntAndFloatOp (e1, e2) intOp floatOp =
   match (e1, e2) with
