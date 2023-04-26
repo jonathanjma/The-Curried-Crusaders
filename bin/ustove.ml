@@ -1,11 +1,11 @@
-(* p = 0 - evaluate and parse; p = 1 - evaluate, no parse; p = 2 - parse only *)
-let rec take_commands p =
+(* mode = 0 - evaluate and parse; mode = 1 - evaluate, no parse; mode = 2 - parse only *)
+let rec take_commands mode =
   print_string "> ";
   match read_line () with
-  | "" -> take_commands p
+  | "" -> take_commands mode
   | x -> (
       if String.get x 0 = '#' then
-        ustring_commands p (String.sub x 1 (String.length x - 1))
+        ustring_commands mode (String.sub x 1 (String.length x - 1))
       else
         match
           let parsed = Interp.Main.parse x in
@@ -16,12 +16,12 @@ let rec take_commands p =
             print_string "Error: ";
             print_endline (Printexc.to_string e);
             print_endline "";
-            take_commands p
+            take_commands mode
         | y ->
-            if p mod 2 = 0 then print_endline y;
-            if p < 2 then show_eval (Interp.Main.parse x);
+            if mode mod 2 = 0 then print_endline y;
+            if mode < 2 then show_eval (Interp.Main.parse x);
             print_endline "";
-            take_commands p)
+            take_commands mode)
 
 and show_eval prs =
   match Interp.Main.(prs |> eval_wrapper |> string_of_val) with

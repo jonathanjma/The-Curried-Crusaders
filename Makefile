@@ -5,7 +5,7 @@ utop:
 	dune utop src
 
 ustove:
-	OCAMLRUNPARAM=b dune exec bin/main.exe
+	OCAMLRUNPARAM=b dune exec bin/ustove.exe
 
 .PHONY: test
 test:
