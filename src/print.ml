@@ -18,11 +18,13 @@ let rec pretty_print (e : expr) (level : int) : string =
     | Joul a -> pretty_print_value "Joul" string_of_float a
     | Bool a -> pretty_print_value "Bool" string_of_bool a
     | Ing a -> pretty_print_value "Ing" (fun x -> x) a
+    | Unit -> "Unit"
     | Nil -> pretty_print_value "Nil" (fun x -> x) "[]"
     | Identifier a -> pretty_print_value "Id" (fun x -> x) a
     | Bowl e -> pretty_print_bowl e level
     | Binop (bop, e1, e2) -> pretty_print_binop bop e1 e2 level
     | LetExpression (name, e1, e2) -> pretty_print_let name e1 e2 level
+    | LetDefinition (name, e) -> pretty_print_let_definition name e level
     | Function (n, e) -> pretty_print_function n e level
     | FunctionApp (e1, e2) -> pretty_print_function_app e1 e2 level
     | Ternary (p, e1, e2) -> pretty_print_ternary p e1 e2 level
@@ -64,6 +66,14 @@ and pretty_print_let (name : string) (e1 : expr) (e2 : expr) (level : int) :
 
   "Let (" ^ name_string ^ ",\n" ^ e1_string ^ ",\n" ^ e2_string
   ^ end_paren_string
+
+and pretty_print_let_definition (name : string) (e1 : expr) (level : int) :
+    string =
+  let name_string : string = nl_l (level + 2) ^ name in
+  let e1_string : string = pretty_print e1 (level + 1) in
+  let end_paren_string : string = nl_l (level + 1) ^ ")" in
+
+  "Let (" ^ name_string ^ ",\n" ^ e1_string ^ end_paren_string
 
 and pretty_print_function (n : string) (e : expr) (level : int) : string =
   let arg_string : string = nl_l (level + 2) ^ n in

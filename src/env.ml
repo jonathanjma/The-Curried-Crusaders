@@ -16,13 +16,26 @@ let rec remove_binding (binding_name : string) (env : t) : t =
 
 let add_binding (binding_name : string) (binding_value : binding_value)
     (env : t) =
-  (* let lst = remove_binding binding_name env in (binding_name, binding_value)
-     :: lst *)
-  (binding_name, binding_value) :: env
+  let lst = remove_binding binding_name env in
+  (binding_name, binding_value) :: lst
+
+let add_binding_m (binding_name : string) (binding_value : binding_value)
+    (env_ref : t ref) =
+  let new_env : t = add_binding binding_name binding_value !env_ref in
+  env_ref := new_env
 
 let rec to_string_h : t -> string = function
   | [] -> ""
-  | (b, _) :: remainder -> "( " ^ b ^ " )" ^ to_string_h remainder
+  | (b, v) :: remainder ->
+      let v_string : string =
+        match v with
+        | StandardValue v' -> string_of_val v'
+        | _ -> failwith "unimplemented to_string for non standard value"
+      in
+
+      let new_binding_string : string = "(" ^ b ^ ", " ^ v_string ^ ")" in
+
+      new_binding_string ^ to_string_h remainder
 
 let to_string : t -> string = fun (env : t) -> "[" ^ to_string_h env ^ "]"
 
@@ -30,12 +43,5 @@ let rec get_binding (binding_name : string) (env : t) : binding_value option =
   match env with
   | [] -> None
   | (name, value) :: remaining_bindings ->
-      if name = binding_name then
-        let () =
-          match value with
-          | StandardValue (Cal n) -> print_endline ""
-          | _ -> failwith "aa"
-        in
-
-        Some value
+      if name = binding_name then Some value
       else get_binding binding_name remaining_bindings

@@ -1,5 +1,6 @@
 (* mode = 0 - evaluate and parse; mode = 1 - evaluate, no parse; mode = 2 -
    parse only *)
+
 let rec take_commands mode =
   print_string "> ";
   match read_line () with
@@ -17,8 +18,8 @@ let rec take_commands mode =
             take_commands mode
         | parsed ->
             (* show pretty printed AST *)
-            if mode mod 2 = 0 then
-              print_endline (Interp.Print.pretty_print parsed 1);
+            if mode mod 2 = 0 then print_endline "-------AST-------";
+            print_endline (Interp.Print.pretty_print parsed 1);
             (* show evaluated result *)
             if mode < 2 then show_eval parsed;
             print_endline "";

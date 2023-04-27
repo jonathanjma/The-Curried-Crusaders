@@ -46,6 +46,8 @@ open Ast
 %token THEN
 %token ELSE
 
+%token UNIT
+
 (* lower precedence operators *)
 
 %left FORK
@@ -108,12 +110,18 @@ expr:
   | UNEGATION; e1 = expr { Unop (Unegation, e1) }
   | LPAREN; e = expr; RPAREN { e }
   | l_e = let_expr { l_e }
+  | l_d = let_defn { l_d }
   | t = ternary_expr { t }
+
   ;
   
 
 let_expr:
   | LET; n = ID; COOK; e1 = expr; IN; e2 = expr { LetExpression (n, e1, e2) }
+  ;
+
+let_defn:
+  | LET; n = ID; COOK; e = expr {LetDefinition (n, e)}
   ;
 
 ternary_expr:
@@ -126,6 +134,7 @@ value:
   | c = RCP { Rcp c }
   | iden = ID; { Identifier iden }
   | b = BOOL { Bool b }
+  | u = UNIT { Unit }
   | PIE { Joul Float.pi }
   | TRUE { Bool true }
   | FALSE { Bool false }
