@@ -55,10 +55,12 @@ let rec big_step (expression, env) : expr * Env.t =
       in
       big_step (e2, new_env)
   | Identifier name -> big_step (step_identifier name env, env)
+  (* let <name> = <expression> in <body> ==== <fun <name> -> <body>>
+     <expression> *)
   | FunctionApp (f, e2) -> (
       match f with
       | Function (p, e) -> big_step (LetExpression (p, e2, e), env)
-      | _ -> failwith "Type error")
+      | _ -> failwith "Function app not applied to function")
   | _ -> failwith "unmatched big_step"
 
 (* [step_binop bop e1 e2] steps a binary operator that contains an operator and
@@ -70,8 +72,14 @@ and step_binop bop e1 e2 =
   | Fork, Cal a, Cal b -> Cal (Int.logxor a b)
   | Subtract, e1, e2 -> handleIntAndFloatOp (e1, e2) ( - ) ( -. )
   | Divide, e1, e2 -> handleIntAndFloatOp (e1, e2) ( / ) ( /. )
-  | Add, a, b -> handleAdd (a, b)
-  | _ -> failwith "Type error: those types do not work the binary operator"
+  | Add, e1, e2 -> handleAdd (e1, e2)
+  | Mod, e1, e2 -> handleIntAndFloatOp (e1, e2) ( mod ) mod_float
+  | Equal, e1, e2 -> handleComparison (e1, e2) ( = )
+  | Less, e1, e2 -> handleComparison (e1, e2) ( < )
+  | Greater, e1, e2 -> handleComparison (e1, e2) ( > )
+  | Leq, e1, e2 -> handleComparison (e1, e2) ( <= )
+  | Geq, e1, e2 -> handleComparison (e1, e2) ( >= )
+  | _ -> failwith "step_binop unimplemented (not a binary operator?)"
 
 and step_identifier name env =
   match Env.get_binding name env with
@@ -85,7 +93,7 @@ and handleIntAndFloatOp (e1, e2) intOp floatOp =
   | Cal a, Joul b -> Joul (floatOp (float_of_int a) b)
   | Joul a, Cal b -> Joul (floatOp a (float_of_int b))
   | Joul a, Joul b -> Joul (floatOp a b)
-  | _ -> failwith "Precondition violated"
+  | _ -> failwith ""
 
 and handleAdd (e1, e2) =
   match (e1, e2) with
@@ -99,6 +107,16 @@ and handleAdd (e1, e2) =
   | Rcp a, Ing b -> Rcp (a ^ b)
   | Ing a, Rcp b -> Rcp (a ^ b)
   | _ -> handleIntAndFloatOp (e1, e2) ( + ) ( +. )
+
+and handleComparison (e1, e2) (compOp : int -> int -> bool) : expr =
+  match (e1, e2) with
+  | Cal e1, Cal e2 -> Bool (compOp (Stdlib.compare e1 e2) 0)
+  | Joul e1, Joul e2 -> Bool (compOp (Stdlib.compare e1 e2) 0)
+  | Cal e1, Joul e2 -> Bool (compOp (Stdlib.compare (float_of_int e1) e2) 0)
+  | Joul e1, Cal e2 -> Bool (compOp (Stdlib.compare e1 (float_of_int e2)) 0)
+  | Rcp e1, Rcp e2 -> Bool (compOp (Stdlib.compare e1 e2) 0)
+  | Ing e1, Ing e2 -> Bool (compOp (Stdlib.compare e1 e2) 0)
+  | _, _ -> failwith "Type error: comparison doesn't apply to given types."
 
 (* [step_ternary b1 e1 e2] steps a ternary expression, such that if [b1] is
    true, the expression evaluates to [step e1], and [step e2] if [b1] is false.
@@ -122,8 +140,14 @@ and step_unop op e1 (env : Env.t) =
         match e1 with
         | Cal a -> Cal ~-a
         | Joul b -> Joul ~-.b
-        | _ -> failwith "Type error"
+        | _ -> failwith "Negative operator not applied to number"
       else Unop (Unegation, fst (big_step (e1, env)))
+  | Boolnegation ->
+      if is_value e1 then
+        match e1 with
+        | Bool b -> Bool (not b)
+        | _ -> failwith "Boolnegation not applied to boolean"
+      else Unop (Boolnegation, fst (big_step (e1, env)))
 
 (** [eval e] evaluates [e] to some value [v]. *)
 let rec eval (env : Env.t) (e : expr) : expr =
@@ -146,7 +170,10 @@ let rec string_of_val (e : expr) : string =
       | _ -> "[" ^ string_of_bowl b ^ "]")
   | Nil -> "[]"
   | Binop _ -> failwith "string of val Precondition violated"
-  | _ -> failwith "string of val Unimplemented"
+  | Ing i -> i
+  | LetExpression (p, e1, e2) ->
+      "let p = " ^ string_of_val e1 ^ " in " ^ string_of_val e2
+  | _ -> failwith "Unimplemented string_of_val"
 
 and string_of_bowl b =
   let rec string_of_bowl_tr acc = function

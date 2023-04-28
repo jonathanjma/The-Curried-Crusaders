@@ -25,6 +25,7 @@ open Ast
 %token RPAREN
 %token EOF
 %token DIVIDE
+%token MOD
 %token SUBTRACT
 %token UNEGATION
 %token GREATER
@@ -32,6 +33,7 @@ open Ast
 %token GEQ
 %token LEQ
 %token EQUAL
+%token BOOLNEGATION
 
 %token DOUBLE_QUOTE
 %token SINGLE_QUOTE
@@ -55,9 +57,9 @@ open Ast
 %left GREATER LESS GEQ LEQ
 
 %left PLUS SUBTRACT 
-%left TIMES DIVIDE
+%left TIMES DIVIDE MOD
 
-%right UNEGATION
+%right UNEGATION BOOLNEGATION
 
 
 
@@ -105,6 +107,8 @@ expr:
   | e1 = expr; LEQ; e2 = expr { Binop (Leq, e1, e2) }
   | e1 = expr; LESS; e2 = expr { Binop (Less, e1, e2) }
   | e1 = expr; GREATER; e2 = expr { Binop (Greater, e1, e2) }
+  | e1 = expr; MOD; e2 = expr { Binop (Mod, e1, e2) }
+  | BOOLNEGATION; e1 = expr { Unop (Boolnegation, e1) }
   | UNEGATION; e1 = expr { Unop (Unegation, e1) }
   | LPAREN; e = expr; RPAREN { e }
   | l_e = let_expr { l_e }

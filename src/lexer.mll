@@ -20,6 +20,7 @@ rule read =
   | "+" { PLUS }
   | "*" { TIMES }
   | "fk" { FORK }
+  | "bs" { BOOLNEGATION }
   | "/" { DIVIDE }
   | "-" { SUBTRACT }
   | "~" { UNEGATION }
@@ -35,6 +36,7 @@ rule read =
   | ">=" { GEQ }
   | "<=" { LEQ }
   | "=" { EQUAL }
+  | "%" { MOD }
   | "," { COMMA }
   | "PIE" { PIE }
   | "cook" { COOK }

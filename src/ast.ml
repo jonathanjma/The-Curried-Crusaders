@@ -11,9 +11,12 @@ type bop =
   | Leq
   | Geq
   | Equal
+  | Mod
 
 (** The type of unary operators *)
-type unop = Unegation  (** The type of the abstract syntax tree (AST). *)
+type unop =
+  | Unegation
+  | Boolnegation  (** The type of the abstract syntax tree (AST). *)
 (* Unegation represents unary negation *)
 
 let bop_to_string : bop -> string = function
@@ -28,9 +31,11 @@ let bop_to_string : bop -> string = function
   | Leq -> "LEQ"
   | Geq -> "GEQ"
   | Equal -> "EQUAL"
+  | Mod -> "MOD"
 
 let unop_to_string : unop -> string = function
   | Unegation -> "UNEGATION"
+  | Boolnegation -> "BOOLNEGATION"
 
 type expr =
   | Cal of int

@@ -34,6 +34,7 @@ let rec get_binding (binding_name : string) (env : t) : binding_value option =
         let () =
           match value with
           | StandardValue (Cal n) -> print_endline ""
+          | StandardValue (Joul n) -> print_endline ""
           | _ -> failwith "aa"
         in
 

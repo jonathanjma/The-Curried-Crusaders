@@ -23,6 +23,10 @@ let eval_string_expression_test name expected_output string_expression =
   name >:: fun _ ->
   assert_equal expected_output (interp string_expression) ~printer:id
 
+(** This function creates a test with an automated name. Its first paremeter is
+    the expected output and the second parameter is the string expression. The
+    automaterd name of the test is "[string expression] should pares to
+    [expected output]" *)
 let eval_autonamed_string_expression_test expected_output string_expression =
   eval_string_expression_test
     (string_expression ^ " should parse to " ^ expected_output)
@@ -74,7 +78,7 @@ let eval_string_tests =
     eval_autonamed_string_expression_test "\"2.a1.110\""
       "2.0 + \"a\" +  1.1  + \"1\" + 0";
     eval_autonamed_string_expression_test
-      ("so true that PI(E) = " ^ string_of_float Float.pi)
+      ("\"so true that PI(E) = " ^ string_of_float Float.pi ^ "\"")
       "\"so \" + true + \" that PI(E) = \" + PIE";
   ]
 
@@ -107,6 +111,23 @@ let eval_binop_tests =
       "3.0 + 5.0 * 2 / 1.0 / 2";
   ]
 
+let eval_function_tests =
+  [
+    eval_autonamed_string_expression_test "2" "(curry x cook x+1) 1";
+    eval_autonamed_string_expression_test "-1"
+      "(curry x cook (curry y cook y-x) 2) 3";
+    eval_autonamed_string_expression_test "4"
+      "(curry x cook (curry x cook x+x) 2) 1";
+    eval_autonamed_string_expression_test "true" "(curry x cook (x % 2 = 0)) 10";
+    eval_autonamed_string_expression_test "24"
+      {|
+      (curry x cook (curry y cook (curry z cook x*y*z) 2) 3) 4
+    |};
+    eval_autonamed_string_expression_test "24."
+      {|
+     (curry x cook (curry y cook (curry z cook x*y*z) 2.0) 3) 4.0 |};
+  ]
+
 let eval_tests =
   List.flatten
     [
@@ -115,6 +136,7 @@ let eval_tests =
       eval_string_tests;
       eval_ternary_tests;
       eval_binop_tests;
+      eval_function_tests;
     ]
 
 let parse_int_tests =
@@ -154,6 +176,7 @@ let string_of_bop = function
   | Ast.Equal -> "="
   | Ast.Greater -> ">"
   | Ast.Less -> "<"
+  | Ast.Mod -> "mod"
 
 let random_parse_binop_tests (tests : int) =
   let rec random_parse_binop_tests (tests : int) (acc : test list) =
