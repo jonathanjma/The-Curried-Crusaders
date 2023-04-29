@@ -26,7 +26,7 @@ let parse (s : string) : expr =
 (** [is_value e] returns whether or not [e] is a value. *)
 let is_value (e : expr) : bool =
   match e with
-  | Cal _ | Joul _ | Rcp _ | Bool _ | Bowl _ | Function _ -> true
+  | Cal _ | Joul _ | Rcp _ | Bool _ | Bowl _ | Function _ | Unit -> true
   | Binop _
   | Ternary _
   | Unop _
@@ -38,10 +38,7 @@ let is_value (e : expr) : bool =
 (** [step e] takes some expression [e] and computes a step of evaluation of [e] *)
 let rec big_step (expression, env) : expr * Env.t =
   match expression with
-  | Cal _ -> (expression, env)
-  | Joul _ -> (expression, env)
-  | Rcp _ -> (expression, env)
-  | Bool _ -> (expression, env)
+  | Cal _ | Joul _ | Rcp _ | Bool _ | Unit -> (expression, env)
   | Unop (op, e1) -> big_step (step_unop op e1 env, env)
   | Binop (bop, e1, e2) ->
       let v1, _ = big_step (e1, env) in
@@ -55,12 +52,12 @@ let rec big_step (expression, env) : expr * Env.t =
       in
       big_step (e2, new_env)
   | Identifier name -> big_step (step_identifier name env, env)
-  (* let <name> = <expression> in <body> ==== <fun <name> -> <body>>
-     <expression> *)
   | FunctionApp (f, e2) -> (
       match f with
       | Function (p, e) -> big_step (LetExpression (p, e2, e), env)
-      | _ -> failwith "Function app not applied to function")
+      | _ -> failwith "Type error")
+  | LetDefinition (n, e) ->
+      failwith "a let definition must be a top level statement"
   | _ -> failwith "unmatched big_step"
 
 (* [step_binop bop e1 e2] steps a binary operator that contains an operator and
@@ -93,7 +90,7 @@ and handleIntAndFloatOp (e1, e2) intOp floatOp =
   | Cal a, Joul b -> Joul (floatOp (float_of_int a) b)
   | Joul a, Cal b -> Joul (floatOp a (float_of_int b))
   | Joul a, Joul b -> Joul (floatOp a b)
-  | _ -> failwith ""
+  | _ -> failwith "Precondition violated"
 
 and handleAdd (e1, e2) =
   match (e1, e2) with
@@ -149,6 +146,8 @@ and step_unop op e1 (env : Env.t) =
         | _ -> failwith "Boolnegation not applied to boolean"
       else Unop (Boolnegation, fst (big_step (e1, env)))
 
+let global_env : Env.t ref = ref Env.empty
+
 (** [eval e] evaluates [e] to some value [v]. *)
 let rec eval (env : Env.t) (e : expr) : expr =
   if is_value e then e
@@ -158,34 +157,35 @@ let rec eval (env : Env.t) (e : expr) : expr =
 
 let eval_wrapper (e : expr) : expr = eval Env.empty e
 
-let rec string_of_val (e : expr) : string =
-  match e with
-  | Cal c -> string_of_int c
-  | Joul j -> string_of_float j
-  | Rcp s -> "\"" ^ s ^ "\""
-  | Bool b -> string_of_bool b
-  | Bowl b -> (
-      match b with
-      | Nil -> "[]"
-      | _ -> "[" ^ string_of_bowl b ^ "]")
-  | Nil -> "[]"
-  | Binop _ -> failwith "string of val Precondition violated"
-  | Ing i -> i
-  | LetExpression (p, e1, e2) ->
-      "let p = " ^ string_of_val e1 ^ " in " ^ string_of_val e2
-  | _ -> failwith "Unimplemented string_of_val"
+let interp (s : string) : string =
+  s |> parse |> function
+  | LetDefinition (n, e) ->
+      let v, _ = big_step (e, !global_env) in
 
-and string_of_bowl b =
-  let rec string_of_bowl_tr acc = function
-    | Nil -> acc
-    | Binop (_, h, t) ->
-        if t = Nil then acc ^ string_of_val h
-        else string_of_bowl_tr (acc ^ string_of_val h ^ ", ") t
-    | _ -> failwith "Precondition violated"
+      let () = add_binding_m n (Env.make_standard_binding_value v) global_env in
+
+      "val " ^ n ^ " = " ^ Ast.string_of_val v
+  | x -> x |> eval !global_env |> Ast.string_of_val
+
+let eval_wrapper (e : expr) : expr =
+  let return_value =
+    match e with
+    | LetDefinition (n, e1) ->
+        let v, _ = big_step (e1, !global_env) in
+
+        let () =
+          add_binding_m n (Env.make_standard_binding_value v) global_env
+        in
+
+        Unit
+    | _ -> eval !global_env e
   in
-  string_of_bowl_tr "" b
 
-let interp (s : string) : string = s |> parse |> eval Env.empty |> string_of_val
-let rec eval (env : Env.t) (e : expr) : expr = fst (big_step (e, env))
-let eval_wrapper (e : expr) : expr = eval Env.empty e
-let interp (s : string) : string = s |> parse |> eval Env.empty |> string_of_val
+  ( !global_env |> Env.to_string |> fun s ->
+    print_endline "-------ENV-------";
+    print_endline s;
+    print_endline "-------EVAL-------" );
+
+  return_value
+
+let string_of_val = Ast.string_of_val

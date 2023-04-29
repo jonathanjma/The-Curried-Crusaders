@@ -50,6 +50,7 @@ rule read =
   | "\"" { read_string (Buffer.create 17) lexbuf }
   | cal { CAL (int_of_string (Lexing.lexeme lexbuf)) }
   | joul { JOUL (float_of_string (Lexing.lexeme lexbuf)) }
+  | "()" {UNIT}
   | eof { EOF }
   | _ { raise (SyntaxError ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
 
