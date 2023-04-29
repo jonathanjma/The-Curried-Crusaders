@@ -26,19 +26,23 @@ let parse (s : string) : expr =
 (** [is_value e] returns whether or not [e] is a value. *)
 let is_value (e : expr) : bool =
   match e with
-  | Cal _ | Joul _ | Rcp _ | Bool _ | Bowl _ | Function _ | Unit -> true
+  | Cal _ | Joul _ | Rcp _ | Bool _ | Bowl _ | FunctionClosure _ | Unit -> true
   | Binop _
   | Ternary _
   | Unop _
   | LetExpression _
   | Identifier _
+  | Function _
   | FunctionApp _ -> false
   | _ -> failwith "is_value: Unimplemented"
 
 (** [step e] takes some expression [e] and computes a step of evaluation of [e] *)
 let rec big_step (expression, env) : expr * Env.t =
   match expression with
-  | Cal _ | Joul _ | Rcp _ | Bool _ | Unit -> (expression, env)
+  | Cal _ | Joul _ | Rcp _ | Bool _ | Unit | FunctionClosure _ ->
+      (expression, env)
+  | Function (p, f) ->
+      (FunctionClosure (Env.to_expr_list env, Function (p, f)), env)
   | Unop (op, e1) -> big_step (step_unop op e1 env, env)
   | Binop (bop, e1, e2) ->
       let v1, _ = big_step (e1, env) in
@@ -52,17 +56,28 @@ let rec big_step (expression, env) : expr * Env.t =
       in
       big_step (e2, new_env)
   | Identifier name -> big_step (step_identifier name env, env)
-  | FunctionApp (f, e2) -> (
-      match f with
-      | Function (p, e) -> big_step (LetExpression (p, e2, e), env)
-      | _ -> failwith "Type error")
+  | FunctionApp (f, e2) -> step_funcapp (fst (big_step (f, env))) e2 env
   | LetDefinition (n, e) ->
       failwith "a let definition must be a top level statement"
   | _ -> failwith "unmatched big_step"
 
-(* [step_binop bop e1 e2] steps a binary operator that contains an operator and
-   two values. Requires: [e1] and [e2] are values. *)
+(** step_funcapp steps a function application from the AST. *)
+and step_funcapp f e2 env =
+  match f with
+  | FunctionClosure (env', Function (p, f')) ->
+      big_step (LetExpression (p, e2, f'), Env.to_env env')
+  | Identifier i -> (
+      match Env.get_binding i env with
+      | Some (StandardValue sv) -> (
+          match sv with
+          | FunctionClosure (env', Function (p, f')) ->
+              big_step (LetExpression (p, e2, f'), Env.to_env env')
+          | _ -> failwith ("Type error: cannot apply " ^ i ^ " as a function"))
+      | None -> failwith ("Unbound identifier " ^ i))
+  | _ -> failwith "Type error: first expression is not a function closure."
 
+(** [step_binop bop e1 e2] steps a binary operator that contains an operator and
+    two values. Requires: [e1] and [e2] are values. *)
 and step_binop bop e1 e2 =
   match (bop, e1, e2) with
   | Mult, e1, e2 -> handleIntAndFloatOp (e1, e2) ( * ) ( *. )
@@ -82,7 +97,6 @@ and step_identifier name env =
   match Env.get_binding name env with
   | None -> failwith ("unbound identifier: " ^ name)
   | Some (StandardValue v) -> v
-  | _ -> failwith "step_identifier precondition violated"
 
 and handleIntAndFloatOp (e1, e2) intOp floatOp =
   match (e1, e2) with

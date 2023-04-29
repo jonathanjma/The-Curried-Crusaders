@@ -51,9 +51,24 @@ type expr =
   | LetExpression of string * expr * expr
   | LetDefinition of string * expr
   | Function of string * expr
+  | FunctionClosure of (string * expr) list * expr
   | Identifier of string
   | FunctionApp of expr * expr
   | Ternary of expr * expr * expr
+
+let string_of_bop = function
+  | Add -> "+"
+  | Mult -> "*"
+  | Fork -> "fk"
+  | Subtract -> "-"
+  | Divide -> "/"
+  | Cons -> "::"
+  | Geq -> ">="
+  | Leq -> "<="
+  | Equal -> "="
+  | Greater -> ">"
+  | Less -> "<"
+  | Mod -> "mod"
 
 let rec string_of_val (e : expr) : string =
   match e with
@@ -67,8 +82,11 @@ let rec string_of_val (e : expr) : string =
       | Nil -> "[]"
       | _ -> "[" ^ string_of_bowl b ^ "]")
   | Nil -> "[]"
-  | Binop _ -> failwith "string of val Precondition violated"
-  | _ -> failwith "string of val Unimplemented"
+  | Binop (binop, e1, e2) -> string_of_val e1 ^ ""
+  | Function (p, e) | FunctionClosure (_, Function (p, e)) ->
+      "Function: f(" ^ p ^ ") = " ^ string_of_val e
+  | Identifier s -> s
+  | _ -> failwith "string_of_val unimplemented"
 
 and string_of_bowl b =
   let rec string_of_bowl_tr acc = function

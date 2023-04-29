@@ -164,20 +164,6 @@ let parse_string_tests =
     parse_test "parse \" \"" "\" \"" (Rcp " ");
   ]
 
-let string_of_bop = function
-  | Ast.Add -> "+"
-  | Ast.Mult -> "*"
-  | Ast.Fork -> "fk"
-  | Ast.Subtract -> "-"
-  | Ast.Divide -> "/"
-  | Ast.Cons -> "::"
-  | Ast.Geq -> ">="
-  | Ast.Leq -> "<="
-  | Ast.Equal -> "="
-  | Ast.Greater -> ">"
-  | Ast.Less -> "<"
-  | Ast.Mod -> "mod"
-
 let random_parse_binop_tests (tests : int) =
   let rec random_parse_binop_tests (tests : int) (acc : test list) =
     if tests = 0 then acc
@@ -197,7 +183,7 @@ let random_parse_binop_tests (tests : int) =
 
       let new_test : test =
         parse_test "parse"
-          (a ^ " " ^ string_of_bop bop ^ " " ^ b)
+          (a ^ " " ^ Ast.string_of_bop bop ^ " " ^ b)
           (Binop (bop, Cal (int_of_string a), Cal (int_of_string b)))
       in
       random_parse_binop_tests (tests - 1) (new_test :: acc)

@@ -1,8 +1,6 @@
 open Ast
 
-type binding_value =
-  | StandardValue of expr
-  | FunctionClosureValue of t * string * expr
+type binding_value = StandardValue of expr
 
 (* a closure represents the state of the environment at a certain time in the
    program's execution*)
@@ -30,7 +28,6 @@ let rec to_string_h : t -> string = function
       let v_string : string =
         match v with
         | StandardValue v' -> string_of_val v'
-        | _ -> failwith "unimplemented to_string for non standard value"
       in
 
       let new_binding_string : string = "(" ^ b ^ ", " ^ v_string ^ ")" in
@@ -45,3 +42,16 @@ let rec get_binding (binding_name : string) (env : t) : binding_value option =
   | (name, value) :: remaining_bindings ->
       if name = binding_name then Some value
       else get_binding binding_name remaining_bindings
+
+let rec to_expr_list (env' : t) =
+  match env' with
+  | [] -> []
+  | (name, value) :: remaining_bindings -> (
+      match value with
+      | StandardValue v -> (name, v) :: to_expr_list remaining_bindings)
+
+let rec to_env (lst : (string * expr) list) : t =
+  match lst with
+  | [] -> []
+  | (name, expr) :: remaining_bindings ->
+      (name, StandardValue expr) :: to_env remaining_bindings
