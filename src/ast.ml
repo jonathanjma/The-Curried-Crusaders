@@ -16,7 +16,9 @@ type bop =
 (** The type of unary operators *)
 type unop =
   | Unegation
-  | Boolnegation  (** The type of the abstract syntax tree (AST). *)
+  | Boolnegation
+  | Print
+  | Println  (** The type of the abstract syntax tree (AST). *)
 (* Unegation represents unary negation *)
 
 (** Converts binary operator to string **)
@@ -38,6 +40,8 @@ let bop_to_string : bop -> string = function
 let unop_to_string : unop -> string = function
   | Unegation -> "UNEGATION"
   | Boolnegation -> "BOOLNEGATION"
+  | Println -> "PRINTLN"
+  | Print -> "PRINT"
 
 (** The type of expressions. **)
 type expr =

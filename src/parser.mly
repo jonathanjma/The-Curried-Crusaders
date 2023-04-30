@@ -18,6 +18,8 @@ open Ast
 %token COMMA
 %token PLUS
 %token FORK
+%token PRINT
+%token PRINTLN
 %token PIE
 %token TIMES
 %token CONS
@@ -81,7 +83,6 @@ let rec desugar_list lst =
 %%
 
 %inline bop:
-| UNEGATION { Unegation }
 | PLUS { Add }
 | SUBTRACT { Subtract }
 | TIMES { Mult }
@@ -112,6 +113,8 @@ expr:
   | e1 = expr; MOD; e2 = expr { Binop (Mod, e1, e2) }
   | BOOLNEGATION; e1 = expr { Unop (Boolnegation, e1) }
   | UNEGATION; e1 = expr { Unop (Unegation, e1) }
+  | PRINT; e1 = expr { Unop (Print, e1) }
+  | PRINTLN; e1 = expr { Unop (Println, e1) }
   | LPAREN; e = expr; RPAREN { e }
   | l_e = let_expr { l_e }
   | l_d = let_defn { l_d }

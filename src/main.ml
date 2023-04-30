@@ -4,6 +4,8 @@ open Print
 
 exception Error of string
 
+let side_effects = ref ""
+
 let print_error_position lexbuf =
   let pos = lexbuf.Lexing.lex_curr_p in
   Printf.sprintf "Line:%d Position:%d" pos.pos_lnum
@@ -25,15 +27,23 @@ let parse (s : string) : expr =
 (** [is_value e] returns whether or not [e] is a value. *)
 let is_value (e : expr) : bool =
   match e with
-  | Cal _ | Joul _ | Rcp _ | Bool _ | Bowl _ | FunctionClosure _ | Unit -> true
+  | Cal _
+  | Joul _
+  | Rcp _
+  | Bool _
+  | Bowl _
+  | FunctionClosure _
+  | Unit
+  | Nil
+  | Ing _ -> true
   | Binop _
   | Ternary _
   | Unop _
   | LetExpression _
   | Identifier _
   | Function _
-  | FunctionApp _ -> false
-  | _ -> failwith "is_value: Unimplemented"
+  | FunctionApp _
+  | LetDefinition (_, _) -> false
 
 (** [step e] takes some expression [e] and computes a step of evaluation of [e] *)
 let rec big_step (expression, env) : expr * Env.t =
@@ -159,6 +169,23 @@ and step_unop op e1 (env : Env.t) =
         | Bool b -> Bool (not b)
         | _ -> failwith "Boolnegation not applied to boolean"
       else Unop (Boolnegation, fst (big_step (e1, env)))
+  | Print ->
+      (* print_endline "PRINT CALLED"; *)
+      evalPrint (e1, env) ""
+  | Println ->
+      (* print_endline "PRINTln CALLED"; *)
+      evalPrint (e1, env) "\n"
+
+and evalPrint (e1, env) extra =
+  let v1 = fst (big_step (e1, env)) in
+  match v1 with
+  | Rcp r ->
+      side_effects := !side_effects ^ r ^ extra;
+      Unit
+  | Ing i ->
+      side_effects := !side_effects ^ i ^ extra;
+      Unit
+  | _ -> failwith "Cannot print non-string type."
 
 let global_env : Env.t ref = ref Env.empty
 
@@ -170,6 +197,15 @@ let rec eval (env : Env.t) (e : expr) : expr =
     eval env_after_step expr_after_step
 
 let eval_wrapper (e : expr) : expr = eval Env.empty e
+
+let make_side_effects (e : expr) =
+  eval_wrapper e;
+  ()
+
+let get_side_effects () : string =
+  let my_side_effects = !side_effects in
+  side_effects := "";
+  my_side_effects
 
 let interp (s : string) : string =
   s |> parse |> function
