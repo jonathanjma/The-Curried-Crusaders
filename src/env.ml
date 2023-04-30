@@ -9,9 +9,13 @@ and t = (string * binding_value) list
 let make_standard_binding_value (e : expr) = StandardValue e
 let empty = [] (* the empty environment *)
 
+(** [remove_binding n env] is environment [env] without any bindings of the name
+    [n]. **)
 let rec remove_binding (binding_name : string) (env : t) : t =
   List.filter (fun (n, _) -> n <> binding_name) env
 
+(** [add_binding n v env] is the environment [env] with a binding of [v] to name
+    [n]. **)
 let add_binding (binding_name : string) (binding_value : binding_value)
     (env : t) =
   let lst = remove_binding binding_name env in
@@ -34,8 +38,11 @@ let rec to_string_h : t -> string = function
 
       new_binding_string ^ to_string_h remainder
 
+(** [to_string env] is the environment [env] represented as a string. **)
 let to_string : t -> string = fun (env : t) -> "[" ^ to_string_h env ^ "]"
 
+(** [get_binding n env] returns a Some [v] if n is bound to v in [env] or None
+    if [n] is not bound in [env]. **)
 let rec get_binding (binding_name : string) (env : t) : binding_value option =
   match env with
   | [] -> None

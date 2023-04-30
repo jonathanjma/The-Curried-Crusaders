@@ -11,18 +11,19 @@ ustove:
 test:
 	dune exec test/main.exe
 
-clean:
-	rm -rf *.coverage _coverage
+clean: bisect-clean
 	dune clean
 
 zip:
 	rm -f iCook.zip
 	zip -r iCook.zip . -x@exclude.lst
 
-bisect:
-	rm -f *.coverage
+bisect: bisect-clean
 	-dune exec --instrument-with bisect_ppx test/main.exe
 	bisect-ppx-report html
+
+bisect-clean:
+	rm -rf _coverage bisect*.coverage
 
 cloc:
 	dune clean
@@ -31,3 +32,9 @@ cloc:
 
 parse_explain:
 	menhir src/parser.mly --explain
+
+doc:
+	dune build @doc
+
+opendoc: doc
+	@bash opendoc.sh

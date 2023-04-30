@@ -19,6 +19,7 @@ type unop =
   | Boolnegation  (** The type of the abstract syntax tree (AST). *)
 (* Unegation represents unary negation *)
 
+(** Converts binary operator to string **)
 let bop_to_string : bop -> string = function
   | Add -> "ADD"
   | Mult -> "MULT"
@@ -33,10 +34,12 @@ let bop_to_string : bop -> string = function
   | Equal -> "EQUAL"
   | Mod -> "MOD"
 
+(** Converts unary operator to string **)
 let unop_to_string : unop -> string = function
   | Unegation -> "UNEGATION"
   | Boolnegation -> "BOOLNEGATION"
 
+(** The type of expressions. **)
 type expr =
   | Cal of int
   | Joul of float
