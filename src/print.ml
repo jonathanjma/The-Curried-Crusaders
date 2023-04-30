@@ -29,7 +29,7 @@ let rec pretty_print (e : expr) (level : int) : string =
     | FunctionApp (e1, e2) -> pretty_print_function_app e1 e2 level
     | Ternary (p, e1, e2) -> pretty_print_ternary p e1 e2 level
     | Unop (op, e1) -> pretty_print_unop op e1 level
-    (* | _ -> failwith "unimplemented" *)
+    | _ -> failwith "unimplemented"
   in
   indentations ^ rest
 
