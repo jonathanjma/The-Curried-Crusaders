@@ -11,6 +11,7 @@ type bop =
 type unop = Unegation  (** The type of the abstract syntax tree (AST). *)
 (* Unegation represents unary negation *)
 
+(** Converts binary operator to string **)
 let bop_to_string : bop -> string = function
   | Add -> "ADD"
   | Mult -> "MULT"
@@ -19,9 +20,11 @@ let bop_to_string : bop -> string = function
   | Subtract -> "SUBTRACT"
   | Cons -> "CONS"
 
+(** Converts unary operator to string **)
 let unop_to_string : unop -> string = function
   | Unegation -> "UNEGATION"
 
+(** The type of expressions. **)
 type expr =
   | Cal of int
   | Joul of float

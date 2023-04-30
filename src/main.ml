@@ -8,6 +8,7 @@ let print_error_position lexbuf =
   Printf.sprintf "Line:%d Position:%d" pos.pos_lnum
     (pos.pos_cnum - pos.pos_bol + 1)
 
+(** [parse s] converts an input string to an expression. **)
 let parse (s : string) : expr =
   let lexbuf = Lexing.from_string s in
   try
@@ -19,8 +20,6 @@ let parse (s : string) : expr =
   | Parser.Error ->
       raise
         (Error (Printf.sprintf "%s: syntax error" (print_error_position lexbuf)))
-
-(** [string_of_val e] converts [e] to a string.contents Requires: [e] is a value *)
 
 (** [is_value e] returns whether or not [e] is a value. *)
 let is_value (e : expr) : bool =
@@ -129,6 +128,7 @@ let rec eval (env : Env.t) (e : expr) : expr =
 
 let eval_wrapper (e : expr) : expr = eval Env.empty e
 
+(** [string_of_val e] converts [e] to a string.contents Requires: [e] is a value *)
 let rec string_of_val (e : expr) : string =
   match e with
   | Cal c -> string_of_int c
