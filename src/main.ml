@@ -62,9 +62,10 @@ let rec big_step (expression, env) : expr * Env.t =
 
 (** step_funcapp steps a function application from the AST. *)
 and step_funcapp f e2 env =
+  let v2 = big_step (e2, env) in
   match f with
   | FunctionClosure (env', Function (p, f')) ->
-      big_step (LetExpression (p, e2, f'), Env.to_env env')
+      big_step (LetExpression (p, fst v2, f'), Env.to_env env')
   | Identifier i -> (
       match Env.get_binding i env with
       | Some (StandardValue sv) -> (

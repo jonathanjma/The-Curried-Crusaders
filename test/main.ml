@@ -29,7 +29,7 @@ let eval_string_expression_test name expected_output string_expression =
     [expected output]" *)
 let eval_autonamed_string_expression_test expected_output string_expression =
   eval_string_expression_test
-    (string_expression ^ " should parse to " ^ expected_output)
+    (string_expression ^ " should evaluate to " ^ expected_output)
     expected_output string_expression
 
 let parse_test (name : string) (input : string) (expected_output : Ast.expr) =
@@ -126,6 +126,17 @@ let eval_function_tests =
     eval_autonamed_string_expression_test "24."
       {|
      (curry x cook (curry y cook (curry z cook x*y*z) 2.0) 3) 4.0 |};
+    eval_autonamed_string_expression_test "42"
+      {|
+    let inc cook (curry x cook x+1) in (
+      let double cook (curry x cook x*2) in (
+        double (inc (inc 19))
+      )
+    )
+    |}
+    (* The issue here is that the function evaluation takes [e1 = inc] and [e2 =
+       inc 19], but in inv's env', inc is undefined, so it can't evaluate
+       [e2] *);
   ]
 
 let eval_tests =
