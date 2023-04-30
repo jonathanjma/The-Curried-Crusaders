@@ -169,12 +169,8 @@ and step_unop op e1 (env : Env.t) =
         | Bool b -> Bool (not b)
         | _ -> failwith "Boolnegation not applied to boolean"
       else Unop (Boolnegation, fst (big_step (e1, env)))
-  | Print ->
-      (* print_endline "PRINT CALLED"; *)
-      evalPrint (e1, env) ""
-  | Println ->
-      (* print_endline "PRINTln CALLED"; *)
-      evalPrint (e1, env) "\n"
+  | Print -> evalPrint (e1, env) ""
+  | Println -> evalPrint (e1, env) "\n"
 
 and evalPrint (e1, env) extra =
   let v1 = fst (big_step (e1, env)) in
