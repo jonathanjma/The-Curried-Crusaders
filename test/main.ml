@@ -133,10 +133,7 @@ let eval_function_tests =
         double (inc (inc 19))
       )
     )
-    |}
-    (* The issue here is that the function evaluation takes [e1 = inc] and [e2 =
-       inc 19], but in inv's env', inc is undefined, so it can't evaluate
-       [e2] *);
+    |};
   ]
 
 let eval_tests =
