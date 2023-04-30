@@ -25,8 +25,15 @@ open Ast
 %token RPAREN
 %token EOF
 %token DIVIDE
+%token MOD
 %token SUBTRACT
 %token UNEGATION
+%token GREATER
+%token LESS
+%token GEQ
+%token LEQ
+%token EQUAL
+%token BOOLNEGATION
 
 %token DOUBLE_QUOTE
 %token SINGLE_QUOTE
@@ -41,12 +48,20 @@ open Ast
 %token THEN
 %token ELSE
 
+%token UNIT
+
 (* lower precedence operators *)
 
 %left FORK
 
+
+%left EQUAL
+%left GREATER LESS GEQ LEQ
+
 %left PLUS SUBTRACT 
-%left TIMES DIVIDE
+%left TIMES DIVIDE MOD
+
+%right UNEGATION BOOLNEGATION
 
 
 
@@ -71,6 +86,11 @@ let rec desugar_list lst =
 | SUBTRACT { Subtract }
 | TIMES { Mult }
 | DIVIDE { Divide }
+| GREATER { Greater }
+| LESS { Less }
+| EQUAL { Equal }
+| LEQ { Leq }
+| GEQ { Geq }
 
 prog:
   | e = expr; EOF { e }
@@ -84,15 +104,28 @@ expr:
   | e1 = expr; TIMES; e2 = expr { Binop (Mult, e1, e2) }
   | e1 = expr; DIVIDE; e2 = expr { Binop (Divide, e1, e2) }
   | e1 = expr; SUBTRACT; e2 = expr { Binop (Subtract, e1, e2) }
+  | e1 = expr; EQUAL; e2 = expr { Binop (Equal, e1, e2) }
+  | e1 = expr; GEQ; e2 = expr { Binop (Geq, e1, e2) }
+  | e1 = expr; LEQ; e2 = expr { Binop (Leq, e1, e2) }
+  | e1 = expr; LESS; e2 = expr { Binop (Less, e1, e2) }
+  | e1 = expr; GREATER; e2 = expr { Binop (Greater, e1, e2) }
+  | e1 = expr; MOD; e2 = expr { Binop (Mod, e1, e2) }
+  | BOOLNEGATION; e1 = expr { Unop (Boolnegation, e1) }
   | UNEGATION; e1 = expr { Unop (Unegation, e1) }
   | LPAREN; e = expr; RPAREN { e }
   | l_e = let_expr { l_e }
+  | l_d = let_defn { l_d }
   | t = ternary_expr { t }
+
   ;
   
 
 let_expr:
   | LET; n = ID; COOK; e1 = expr; IN; e2 = expr { LetExpression (n, e1, e2) }
+  ;
+
+let_defn:
+  | LET; n = ID; COOK; e = expr {LetDefinition (n, e)}
   ;
 
 ternary_expr:
@@ -105,6 +138,7 @@ value:
   | c = RCP { Rcp c }
   | iden = ID; { Identifier iden }
   | b = BOOL { Bool b }
+  | u = UNIT { Unit }
   | PIE { Joul Float.pi }
   | TRUE { Bool true }
   | FALSE { Bool false }

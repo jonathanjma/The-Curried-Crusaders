@@ -20,6 +20,7 @@ rule read =
   | "+" { PLUS }
   | "*" { TIMES }
   | "fk" { FORK }
+  | "bs" { BOOLNEGATION }
   | "/" { DIVIDE }
   | "-" { SUBTRACT }
   | "~" { UNEGATION }
@@ -30,6 +31,12 @@ rule read =
   | "false" { FALSE }
   | "[" { LBRAC }
   | "]" { RBRAC }
+  | ">" { GREATER }
+  | "<" { LESS }
+  | ">=" { GEQ }
+  | "<=" { LEQ }
+  | "=" { EQUAL }
+  | "%" { MOD }
   | "," { COMMA }
   | "PIE" { PIE }
   | "cook" { COOK }
@@ -43,6 +50,7 @@ rule read =
   | "\"" { read_string (Buffer.create 17) lexbuf }
   | cal { CAL (int_of_string (Lexing.lexeme lexbuf)) }
   | joul { JOUL (float_of_string (Lexing.lexeme lexbuf)) }
+  | "()" {UNIT}
   | eof { EOF }
   | _ { raise (SyntaxError ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
 

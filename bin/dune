@@ -1,3 +1,3 @@
 (executable
- (name main)
- (libraries Interp ANSITerminal))
+ (name ustove)
+ (libraries Interp lambda-term))
