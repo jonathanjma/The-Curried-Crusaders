@@ -23,6 +23,11 @@ let eval_string_expression_test name expected_output string_expression =
   name >:: fun _ ->
   assert_equal expected_output (interp string_expression) ~printer:id
 
+let read_file_test (name: string) (rel_dir: string) (expected_output: string) =
+  name >:: fun _ ->
+    let dir: string = "test/programs/" ^ rel_dir ^ ".icook" in
+    assert_equal (Filereader.read dir) expected_output
+
 (** This function creates a test with an automated name. Its first paremeter is
     the expected output and the second parameter is the string expression. The
     automaterd name of the test is "[string expression] should pares to
@@ -415,6 +420,11 @@ let complex_parse_tests =
                 Identifier "n" ) ));
   ]
 
+
+let read_file_tests = [
+  read_file_test "one" "prog_one" "let a cook 1";
+]
+
 let parse_tests =
   List.flatten
     [
@@ -429,6 +439,7 @@ let parse_tests =
       parse_ternary_tests;
       parse_bowl_tests;
       complex_parse_tests;
+      read_file_tests
     ]
 
 let random_tests =
