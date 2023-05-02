@@ -41,6 +41,8 @@ rule read =
   | "PIE" { PIE }
   | "cook" { COOK }
   | "curry" { CURRY }
+  | "print" { PRINT }
+  | "println" { PRINTLN }
   | "let" { LET }
   | "in" { IN }
   | "if" { IF }

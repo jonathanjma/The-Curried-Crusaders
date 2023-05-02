@@ -15,6 +15,8 @@ type bop =
 
 (** The type of unary operators *)
 type unop =
+  | Print (* print string operator *)
+  | Println  (** println operator *)
   | Unegation (* unary negation *)
   | Boolnegation (* boolean negation *)
 
@@ -37,6 +39,8 @@ let bop_to_string : bop -> string = function
 let unop_to_string : unop -> string = function
   | Unegation -> "UNEGATION"
   | Boolnegation -> "BOOLNEGATION"
+  | Println -> "PRINTLN"
+  | Print -> "PRINT"
 
 (** The type of expressions *)
 type expr =
