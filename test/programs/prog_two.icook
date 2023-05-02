@@ -1,0 +1,3 @@
+let a cook 1 in
+let f cook curry n cook n + 1 in
+f a

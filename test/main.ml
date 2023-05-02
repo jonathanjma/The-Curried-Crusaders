@@ -23,6 +23,11 @@ let eval_string_expression_test name expected_output string_expression =
   name >:: fun _ ->
   assert_equal expected_output (interp string_expression) ~printer:id
 
+let read_file_test (name: string) (rel_dir: string) (expected_output: string) =
+  name >:: fun _ ->
+    let dir: string = "test/programs/" ^ rel_dir ^ ".icook" in
+    assert_equal (Filereader.read dir) expected_output
+
 (** This function creates a test with an automated name. Its first paremeter is
     the expected output and the second parameter is the string expression. The
     automaterd name of the test is "[string expression] should pares to
@@ -90,6 +95,8 @@ let eval_ternary_tests =
       "if false then 1 else 0";
     eval_expression_test "if true then 1    +  1 *  4 else 3 + 2 + 1 * 1 -> 5"
       "5" "if true then 1    +  1 *  4 else 3 + 2 + 1 * 1";
+    eval_expression_test "" "5" "if true then 5 else 10";
+    eval_expression_test "" "\"two is less than three\"" "if 2 < 3 then \"two is less than three\" else \"two is not less than three\""
   ]
 
 let parse_bowl_tests =
@@ -139,6 +146,38 @@ let eval_function_tests =
        [e2] *);
   ]
 
+let eval_let_expression_tests = [
+  eval_expression_test "" "1" "let a cook 1 in a";
+  eval_expression_test "" "2" "let a cook 1 in a + 1";
+  eval_expression_test "" "1" "let a cook 1 in (1)";
+  eval_expression_test "" "15" 
+  {|
+  let a cook 1 in
+  let b cook 2 in
+  let c cook 3 in
+  let d cook 4 in
+  let e cook 5 in
+  a + b + c + d + e
+  |};
+  eval_expression_test "" {|"e"|} 
+  {|
+  let a cook "a" in
+  let b cook "b" in
+  let c cook "c" in
+  let d cook "d" in
+  let e cook "e" in
+  
+  if true then e else d
+  |};
+  eval_expression_test "" {|5|} 
+  {|
+  let succ cook (curry n cook n + 1) in
+  let a cook 1 in
+  let b cook 2 in
+  succ (succ (a + b))
+  |}
+]
+
 let eval_tests =
   List.flatten
     [
@@ -148,6 +187,7 @@ let eval_tests =
       eval_ternary_tests;
       eval_binop_tests;
       eval_function_tests;
+      eval_let_expression_tests
     ]
 
 let parse_int_tests =
@@ -415,6 +455,14 @@ let complex_parse_tests =
                 Identifier "n" ) ));
   ]
 
+
+
+
+
+let read_file_tests = [
+  read_file_test "one" "prog_one" "let a cook 1";
+]
+
 let parse_tests =
   List.flatten
     [
@@ -429,6 +477,7 @@ let parse_tests =
       parse_ternary_tests;
       parse_bowl_tests;
       complex_parse_tests;
+      read_file_tests
     ]
 
 let random_tests =
@@ -451,3 +500,4 @@ let () =
     print_endline "\nRunning random tests";
     Random.self_init ();
     run_test_tt_main ("random suite" >::: random_tests))
+

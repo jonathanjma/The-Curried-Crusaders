@@ -60,9 +60,7 @@ let rec big_step (expression, env) : expr * Env.t =
   | Ternary (b1, e1, e2) -> big_step (step_ternary b1 e1 e2 env, env)
   | LetExpression (name, e1, e2) ->
       let v1, _ = big_step (e1, env) in
-      let new_env : Env.t =
-        Env.add_binding name (Env.make_standard_binding_value v1) env
-      in
+      let new_env : Env.t = Env.add_binding name v1 env in
       big_step (e2, new_env)
   | Identifier name -> big_step (step_identifier name env, env)
   | FunctionApp (f, e2) -> step_funcapp (fst (big_step (f, env))) e2 env
@@ -78,7 +76,7 @@ and step_funcapp f e2 env =
       big_step (LetExpression (p, fst v2, f'), Env.to_env env')
   | Identifier i -> (
       match Env.get_binding i env with
-      | Some (StandardValue sv) -> (
+      | Some sv -> (
           match sv with
           | FunctionClosure (env', Function (p, f')) ->
               big_step (LetExpression (p, e2, f'), Env.to_env env')
@@ -106,7 +104,7 @@ and step_binop bop e1 e2 =
 and step_identifier name env =
   match Env.get_binding name env with
   | None -> failwith ("unbound identifier: " ^ name)
-  | Some (StandardValue v) -> v
+  | Some v -> v
 
 and handleIntAndFloatOp (e1, e2) intOp floatOp =
   match (e1, e2) with
@@ -208,7 +206,7 @@ let interp (s : string) : string =
   | LetDefinition (n, e) ->
       let v, _ = big_step (e, !global_env) in
 
-      let () = add_binding_m n (Env.make_standard_binding_value v) global_env in
+      let () = add_binding_mut n v global_env in
 
       "val " ^ n ^ " = " ^ Ast.string_of_val v
   | x -> x |> eval !global_env |> Ast.string_of_val
@@ -219,9 +217,7 @@ let eval_wrapper (e : expr) : expr =
     | LetDefinition (n, e1) ->
         let v, _ = big_step (e1, !global_env) in
 
-        let () =
-          add_binding_m n (Env.make_standard_binding_value v) global_env
-        in
+        let () = add_binding_mut n v global_env in
 
         Unit
     | _ -> eval !global_env e
