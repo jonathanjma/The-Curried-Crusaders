@@ -1,3 +1,9 @@
 (executable
  (name ustove)
+ (modules ustove)
  (libraries Interp lambda-term))
+
+(executable
+ (name cook)
+ (modules cook)
+ (libraries Interp))
