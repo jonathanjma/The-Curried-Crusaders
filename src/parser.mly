@@ -6,9 +6,6 @@ open Ast
 %token <float> JOUL
 %token <string> ID
 %token <string> RCP
-
-%token <char> ING
-
 %token <bool> BOOL
 %token TRUE
 %token FALSE
@@ -55,8 +52,6 @@ open Ast
 (* lower precedence operators *)
 
 %left FORK
-
-
 %left EQUAL
 %left GREATER LESS GEQ LEQ
 
@@ -64,9 +59,6 @@ open Ast
 %left TIMES DIVIDE MOD
 
 %right UNEGATION BOOLNEGATION
-
-
-
 %left CONS
 
 (* higher precedence operators *)
@@ -97,7 +89,6 @@ prog:
   | e = expr; EOF { e }
   ;
 
-
 expr:
   | v = value { v }
   | e1 = expr; PLUS; e2 = expr { Binop (Add, e1, e2) }
@@ -119,7 +110,6 @@ expr:
   | l_e = let_expr { l_e }
   | l_d = let_defn { l_d }
   | t = ternary_expr { t }
-
   ;
   
 
@@ -155,4 +145,4 @@ function_value:
 
 function_app:
   | e1 = expr; e2 = expr { FunctionApp (e1, e2) }
-;
+  ;

@@ -47,7 +47,6 @@ type expr =
   | Cal of int
   | Joul of float
   | Rcp of string
-  | Ing of string
   | Unit
   | Unop of unop * expr
   | Bool of bool

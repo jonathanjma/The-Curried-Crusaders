@@ -8,14 +8,12 @@ module UStove = struct
   type state = {
     count : int;
     command : string;
-    env : Env.t;
     mode : int;
     output : string ref;
   }
 
   (* Initial state of the REPL *)
-  let initial_state =
-    { count = 1; command = ""; env = Env.empty; mode = 0; output = ref "" }
+  let initial_state = { count = 1; command = ""; mode = 0; output = ref "" }
 
   (* Take a command from the REPL *)
   let rec take_commands state input =
@@ -40,10 +38,7 @@ module UStove = struct
               in
               (* show evaluated result *)
               let eval =
-                if state'.mode < 2 then (
-                  print_endline "SHOWING EVAL!!!";
-                  "  " ^ show_eval parsed)
-                else ""
+                if state'.mode < 2 then "  " ^ show_eval parsed else ""
               in
               if state'.mode = 3 then Interp.Main.make_side_effects parsed;
               (state', ast_pp ^ eval))
@@ -71,7 +66,7 @@ module UStove = struct
     | "mode 1" -> ({ state with mode = 1 }, "mode 1 set")
     | "mode 2" -> ({ state with mode = 2 }, "mode 2 set")
     | "mode 3" -> ({ state with mode = 3 }, "mode 3 set")
-    | "env" -> (state, Env.to_string state.env)
+    | "env" -> (state, Env.to_string !Main.global_env)
     | "clear" ->
         let _ = Sys.command "clear" in
         (state, "ustove cleared.\nPlease enter a command.")

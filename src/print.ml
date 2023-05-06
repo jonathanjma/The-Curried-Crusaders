@@ -25,7 +25,6 @@ let rec pretty_print (e : expr) (level : int) : string =
     | Rcp a -> pretty_print_value "Rcp" (fun x -> x) a
     | Joul a -> pretty_print_value "Joul" string_of_float a
     | Bool a -> pretty_print_value "Bool" string_of_bool a
-    | Ing a -> pretty_print_value "Ing" (fun x -> x) a
     | Unit -> "Unit"
     | Nil -> pretty_print_value "Nil" (fun x -> x) "[]"
     | Identifier a -> pretty_print_value "Id" (fun x -> x) a

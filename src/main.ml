@@ -27,15 +27,8 @@ let parse (s : string) : expr =
 (** [is_value e] returns whether or not [e] is a value. *)
 let is_value (e : expr) : bool =
   match e with
-  | Cal _
-  | Joul _
-  | Rcp _
-  | Bool _
-  | Bowl _
-  | FunctionClosure _
-  | Unit
-  | Nil
-  | Ing _ -> true
+  | Cal _ | Joul _ | Rcp _ | Bool _ | Bowl _ | FunctionClosure _ | Unit | Nil ->
+      true
   | Binop _
   | Ternary _
   | Unop _
@@ -123,8 +116,6 @@ and handleAdd (e1, e2) =
   | Joul a, Rcp b -> Rcp (string_of_float a ^ b)
   | Rcp a, Bool b -> Rcp (a ^ string_of_bool b)
   | Bool a, Rcp b -> Rcp (string_of_bool a ^ b)
-  | Rcp a, Ing b -> Rcp (a ^ b)
-  | Ing a, Rcp b -> Rcp (a ^ b)
   | _ -> handleIntAndFloatOp (e1, e2) ( + ) ( +. )
 
 and handleComparison (e1, e2) (compOp : int -> int -> bool) : expr =
@@ -134,7 +125,6 @@ and handleComparison (e1, e2) (compOp : int -> int -> bool) : expr =
   | Cal e1, Joul e2 -> Bool (compOp (Stdlib.compare (float_of_int e1) e2) 0)
   | Joul e1, Cal e2 -> Bool (compOp (Stdlib.compare e1 (float_of_int e2)) 0)
   | Rcp e1, Rcp e2 -> Bool (compOp (Stdlib.compare e1 e2) 0)
-  | Ing e1, Ing e2 -> Bool (compOp (Stdlib.compare e1 e2) 0)
   | _, _ -> failwith "Type error: comparison doesn't apply to given types."
 
 (* [step_ternary b1 e1 e2] steps a ternary expression, such that if [b1] is
@@ -172,14 +162,12 @@ and step_unop op e1 (env : Env.t) =
 
 and evalPrint (e1, env) extra =
   let v1 = fst (big_step (e1, env)) in
-  match v1 with
-  | Rcp r ->
-      side_effects := !side_effects ^ r ^ extra;
-      Unit
-  | Ing i ->
-      side_effects := !side_effects ^ i ^ extra;
-      Unit
-  | _ -> failwith "Cannot print non-string type."
+  side_effects :=
+    !side_effects
+    ^ (if is_value v1 then Ast.string_of_val v1
+      else failwith "Cannot print non-string type.")
+    ^ extra;
+  Unit
 
 let global_env : Env.t ref = ref Env.empty
 
@@ -193,7 +181,7 @@ let rec eval (env : Env.t) (e : expr) : expr =
 let eval_wrapper (e : expr) : expr = eval Env.empty e
 
 let make_side_effects (e : expr) =
-  eval_wrapper e;
+  ignore (eval_wrapper e);
   ()
 
 let get_side_effects () : string =
@@ -222,12 +210,6 @@ let eval_wrapper (e : expr) : expr =
         Unit
     | _ -> eval !global_env e
   in
-
-  ( !global_env |> Env.to_string |> fun s ->
-    print_endline "-------ENV-------";
-    print_endline s;
-    print_endline "-------EVAL-------" );
-
   return_value
 
 let string_of_val = Ast.string_of_val
