@@ -3,6 +3,9 @@ open Interp
 open Main
 open OUnit2
 
+(* This number denotes how many of each type of random test to generate *)
+let number_of_random_tests = 500
+
 module RandomFunctionTests = struct
   type function_input =
     | Int of int
@@ -39,7 +42,7 @@ module RandomFunctionTests = struct
 
   let random_int_tests (func : string) (expectation_function : int -> int) =
     let tests : test list ref = ref [] in
-    for i = 0 to 500 do
+    for i = 0 to number_of_random_tests do
       let x : int = Random.int 200 in
       tests :=
         random_input_test (Int x) func_1
@@ -249,15 +252,16 @@ let random_parse_string_tests (tests : int) =
   in
   random_parse_tests tests []
 
-let random_tests num =
+let random_tests =
   List.flatten
     [
-      random_parse_string_tests num;
-      random_parse_int_tests num;
-      random_parse_float_tests num;
-      random_parse_binop_tests num;
-      random_eval_comparison_tests num;
-      random_eval_binop_tests num;
-      random_let_expr_test num;
-      random_let_def_test num (* RandomFunctionTests.tests; *);
+      random_parse_string_tests number_of_random_tests;
+      random_parse_int_tests number_of_random_tests;
+      random_parse_float_tests number_of_random_tests;
+      random_parse_binop_tests number_of_random_tests;
+      random_eval_comparison_tests number_of_random_tests;
+      random_eval_binop_tests number_of_random_tests;
+      random_let_expr_test number_of_random_tests;
+      random_let_def_test number_of_random_tests;
+      RandomFunctionTests.tests;
     ]

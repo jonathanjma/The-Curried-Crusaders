@@ -6,9 +6,6 @@ open Main
    time! *)
 let run_random_tests = true
 
-(* This number denotes how many of each type of random test to generate *)
-let number_of_random_tests = 500
-
 let tests = List.flatten [ Eval_test.eval_tests; Parse_test.parse_tests ]
 
 let () =
@@ -19,4 +16,4 @@ let () =
   if run_random_tests then (
     print_endline "\nRunning random tests";
     Random.self_init ();
-    run_test_tt_main ("random suite" >::: Random_test.random_tests number_of_random_tests))
+    run_test_tt_main ("random suite" >::: Random_test.random_tests))
