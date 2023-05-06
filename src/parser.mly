@@ -44,7 +44,7 @@ open Ast
 %token THEN
 %token ELSE
 
-%nonassoc LET IN IF THEN ELSE CURRY 
+%nonassoc LET IN IF ELSE CURRY 
 %nonassoc TRUE FALSE PIE
 
 (* operator precedence *)
@@ -87,7 +87,7 @@ let_expr:
   ;
 
 let_defn:
-  | LET; n = ID; COOK; e = expr {LetDefinition (n, e)}
+  | LET; n = ID; COOK; e = expr { LetDefinition (n, e) }
   ;
 
 ternary_expr:

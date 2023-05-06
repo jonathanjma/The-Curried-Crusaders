@@ -4,7 +4,7 @@ open Main
 
 (* Random tests are performance intensive, you may not want to run them every
    time! *)
-let run_random_tests = false
+let run_random_tests = true
 
 (* This number denotes how many of each type of random test to generate *)
 let number_of_random_tests = 500
@@ -23,6 +23,11 @@ let eval_string_expression_test name expected_output string_expression =
   name >:: fun _ ->
   assert_equal expected_output (interp string_expression) ~printer:id
 
+let icook_str_of_int n1 =
+  let n1_str = string_of_int n1 in
+  if n1 >= 0 then n1_str
+  else "~" ^ String.sub n1_str 1 (String.length n1_str - 1)
+
 let read_file_test (name : string) (rel_dir : string) (expected_output : string)
     =
   name >:: fun _ ->
@@ -31,12 +36,18 @@ let read_file_test (name : string) (rel_dir : string) (expected_output : string)
 
 (** This function creates a test with an automated name. Its first paremeter is
     the expected output and the second parameter is the string expression. The
-    automaterd name of the test is "[string expression] should pares to
+    automaterd name of the test is "[string expression] should parse to
     [expected output]" *)
 let eval_autonamed_string_expression_test expected_output string_expression =
   eval_string_expression_test
     (string_expression ^ " should evaluate to " ^ expected_output)
     expected_output string_expression
+
+let env_equality_test expected_env string_expression =
+  eval_string_expression_test
+    (string_expression ^ " should produce the env " ^ Env.to_string expected_env)
+    (Env.to_string expected_env)
+    (Env.to_string !Main.global_env)
 
 let parse_test (name : string) (input : string) (expected_output : Ast.expr) =
   name >:: fun _ -> assert_equal (parse input) expected_output
@@ -46,6 +57,158 @@ let icook_string_of_int i =
 
 let icook_string_of_float (i : float) =
   if i < 0. then "~" ^ string_of_float (i *. -1.) else string_of_float i
+
+module RandomFunctionTests = struct
+  type function_input =
+    | Int of int
+    | String of string
+    | Bool of bool
+
+  let func_1 : string = {|curry n cook n|}
+  let expectation_function_1 (x : int) = x
+  let func_2 : string = {|curry n cook n + 1|}
+  let expectation_function_2 (x : int) = x + 1
+  let func_3 : string = {|curry n cook n + 10|}
+  let expectation_function_3 (x : int) = x + 10
+  let func_4 : string = {|curry n cook n * 2|}
+  let expectation_function_4 (x : int) = x * 2
+  let func_5 : string = {|curry n cook 5 * n|}
+  let expectation_function_5 (x : int) = 5 * x
+  let func_6 : string = {|curry n cook 3 * n + 1|}
+  let expectation_function_6 (x : int) = (3 * x) + 1
+  let func_7 : string = {|curry n cook (1 + n) * n|}
+  let expectation_function_7 (x : int) = (1 + x) * x
+
+  let string_of_function_input : function_input -> string = function
+    | Int n -> string_of_int n
+    | String s -> s
+    | Bool b -> string_of_bool b
+
+  let random_input_test (x : function_input) (function_string : string)
+      (expected_output : string) =
+    let expression : string =
+      {|let n cook |} ^ string_of_function_input x ^ {|in |} ^ "let f cook "
+      ^ function_string ^ "in f n"
+    in
+    eval_autonamed_string_expression_test expected_output expression
+
+  let random_int_tests (func : string) (expectation_function : int -> int) =
+    let tests : test list ref = ref [] in
+    for i = 0 to number_of_random_tests do
+      let x : int = Random.int 200 in
+      tests :=
+        random_input_test (Int x) func_1
+          (x |> expectation_function |> string_of_int)
+        :: !tests
+    done;
+    !tests
+
+  let tests : test list =
+    List.flatten
+      [
+        random_int_tests func_1 expectation_function_1;
+        random_int_tests func_2 expectation_function_2;
+        random_int_tests func_3 expectation_function_3;
+        random_int_tests func_4 expectation_function_4;
+        random_int_tests func_5 expectation_function_5;
+        random_int_tests func_6 expectation_function_6;
+        random_int_tests func_7 expectation_function_7;
+      ]
+end
+
+let rec random_let_expr_test num = let_expr_test_tr num []
+
+and let_expr_test_tr num acc =
+  if num = 0 then acc
+  else
+    let rand_int = Random.int 229 in
+    let to_test = "let x cook " ^ string_of_int rand_int ^ " in x" in
+    let_expr_test_tr (num - 1)
+      (eval_autonamed_string_expression_test (string_of_int rand_int) to_test
+      :: acc)
+
+let rec random_let_def_test num = let_expr_test_tr num []
+
+and let_def_test_tr num acc =
+  if num = 0 then acc
+  else
+    let rand_int = Random.int Int.max_int in
+    let to_test = "let x cook " ^ string_of_int rand_int in
+    let_def_test_tr (num - 1)
+      (env_equality_test (Env.add_binding "x" (Cal rand_int) Env.empty) to_test
+      :: acc)
+
+let rec random_eval_comparison_tests (tests : int) : test list =
+  let rec random_eval_comparison_tests_tr (tests : int) (acc : test list) :
+      test list =
+    if tests = 0 then acc
+    else
+      let n1 =
+        if Random.int 2 = 0 then ~-(Random.int 229) else Random.int 229
+      in
+      let n2 =
+        if Random.int 2 = 0 then ~-(Random.int 229) else Random.int 229
+      in
+      let binop =
+        match Random.int 5 with
+        | 0 -> ">"
+        | 1 -> "<"
+        | 2 -> ">="
+        | 3 -> "<="
+        | 4 -> "="
+        | _ -> failwith "Poorly generated random number."
+      in
+      let e1 = icook_str_of_int n1 ^ binop ^ icook_str_of_int n2 in
+      let expected =
+        string_of_bool
+          (match binop with
+          | ">" -> n1 > n2
+          | "<" -> n1 < n2
+          | ">=" -> n1 >= n2
+          | "<=" -> n1 <= n2
+          | "=" -> n1 = n2
+          | _ -> failwith "Poorly generated binop")
+      in
+      random_eval_comparison_tests_tr (tests - 1)
+        (eval_autonamed_string_expression_test expected e1 :: acc)
+  in
+  random_eval_comparison_tests_tr tests []
+
+let random_eval_binop_tests (tests : int) : test list =
+  let rec random_eval_binop_tests_tr (tests : int) (acc : test list) : test list
+      =
+    if tests = 0 then acc
+    else
+      let n1 =
+        if Random.int 2 = 0 then ~-(Random.int 229) else Random.int 229
+      in
+      let n2 =
+        if Random.int 2 = 0 then ~-(Random.int 229) else Random.int 229
+      in
+      let binop =
+        match Random.int 5 with
+        | 0 -> "+"
+        | 1 -> "-"
+        | 2 -> "/"
+        | 3 -> " fk "
+        | 4 -> "*"
+        | _ -> failwith "Poorly generated random number."
+      in
+      let e1 = icook_string_of_int n1 ^ binop ^ icook_string_of_int n2 in
+      let expected =
+        string_of_int
+          (match binop with
+          | "+" -> n1 + n2
+          | "-" -> n1 - n2
+          | "/" -> n1 / n2
+          | " fk " -> Int.logxor n1 n2
+          | "*" -> n1 * n2
+          | _ -> failwith "Poorly generated binop")
+      in
+      random_eval_binop_tests_tr (tests - 1)
+        (eval_autonamed_string_expression_test expected e1 :: acc)
+  in
+  random_eval_binop_tests_tr tests []
 
 let eval_int_tests =
   [
@@ -131,7 +294,7 @@ let eval_function_tests =
         double (inc (inc 19))
       )
     )
-    |};
+      |};
   ]
 
 let eval_let_expression_tests =
@@ -482,6 +645,11 @@ let random_tests =
       random_parse_int_tests number_of_random_tests;
       random_parse_float_tests number_of_random_tests;
       random_parse_binop_tests number_of_random_tests;
+      random_eval_comparison_tests number_of_random_tests;
+      random_eval_binop_tests number_of_random_tests;
+      random_let_expr_test number_of_random_tests;
+      random_let_def_test number_of_random_tests
+      (* RandomFunctionTests.tests; *);
     ]
 
 let tests = List.flatten [ eval_tests; parse_tests ]
