@@ -180,10 +180,6 @@ let rec eval (env : Env.t) (e : expr) : expr =
 
 let eval_wrapper (e : expr) : expr = eval Env.empty e
 
-let make_side_effects (e : expr) =
-  ignore (eval_wrapper e);
-  ()
-
 let get_side_effects () : string =
   let my_side_effects = !side_effects in
   side_effects := "";
