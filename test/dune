@@ -1,3 +1,4 @@
 (executable
- (name main)
+ (name test)
+ (modules test eval_test parse_test random_test test_util)
  (libraries interp ounit2))
