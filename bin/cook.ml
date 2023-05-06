@@ -9,7 +9,10 @@ let rec parse_lines lines =
       | parsed ->
           (match Main.(parsed |> eval_wrapper |> string_of_val) with
           | exception e -> print_endline ("Error:" ^ Printexc.to_string e)
-          | evaluated -> print_endline evaluated);
+          | evaluated ->
+              let side_effects = Main.get_side_effects () in
+              if String.length side_effects > 0 then print_endline side_effects
+              else ());
           parse_lines t)
 
 let rec prompt_input () =

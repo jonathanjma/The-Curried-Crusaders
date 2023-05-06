@@ -23,10 +23,11 @@ let eval_string_expression_test name expected_output string_expression =
   name >:: fun _ ->
   assert_equal expected_output (interp string_expression) ~printer:id
 
-let read_file_test (name: string) (rel_dir: string) (expected_output: string) =
+let read_file_test (name : string) (rel_dir : string) (expected_output : string)
+    =
   name >:: fun _ ->
-    let dir: string = "test/programs/" ^ rel_dir ^ ".icook" in
-    assert_equal (Filereader.read dir) expected_output
+  let dir : string = "test/programs/" ^ rel_dir ^ ".icook" in
+  assert_equal (Filereader.read dir) expected_output
 
 (** This function creates a test with an automated name. Its first paremeter is
     the expected output and the second parameter is the string expression. The
@@ -68,7 +69,7 @@ let eval_int_tests =
 let eval_float_tests =
   [
     eval_float_expression_test "2.0 should parse to 2.0" 2.0 "2.0";
-    (* eval_float_expression_test "-7.0 should parse to 2.0" ~-.7.0 "-7.0"; *)
+    eval_float_expression_test "-7.0 should parse to -7.0" (-7.0) "~7.0";
     eval_float_expression_test "PIE should parse to 3.141..." Float.pi "PIE";
   ]
 
@@ -96,19 +97,9 @@ let eval_ternary_tests =
     eval_expression_test "if true then 1    +  1 *  4 else 3 + 2 + 1 * 1 -> 5"
       "5" "if true then 1    +  1 *  4 else 3 + 2 + 1 * 1";
     eval_expression_test "" "5" "if true then 5 else 10";
-    eval_expression_test "" "\"two is less than three\"" "if 2 < 3 then \"two is less than three\" else \"two is not less than three\""
-  ]
-
-let parse_bowl_tests =
-  [
-    parse_test "[  ]  should parse to []" " [  ]  " (Bowl Nil);
-    parse_test "[4] should parse to Bowl(Binop(Cons, Cal 4, Nil))" "[4]"
-      (Bowl (Binop (Cons, Cal 4, Nil)));
-    parse_test
-      "[5, \"hi\" should parse to Bowl(Binop(Cons, Cal 5, (Cons, Rcp \"hi\", \
-       Nil)))]"
-      "[5, \"hi\"]"
-      (Bowl (Binop (Cons, Cal 5, Binop (Cons, Rcp "hi", Nil))));
+    eval_expression_test "" "\"two is less than three\""
+      "if 2 < 3 then \"two is less than three\" else \"two is not less than \
+       three\"";
   ]
 
 let eval_binop_tests =
@@ -140,18 +131,16 @@ let eval_function_tests =
         double (inc (inc 19))
       )
     )
-    |}
-    (* The issue here is that the function evaluation takes [e1 = inc] and [e2 =
-       inc 19], but in inv's env', inc is undefined, so it can't evaluate
-       [e2] *);
+    |};
   ]
 
-let eval_let_expression_tests = [
-  eval_expression_test "" "1" "let a cook 1 in a";
-  eval_expression_test "" "2" "let a cook 1 in a + 1";
-  eval_expression_test "" "1" "let a cook 1 in (1)";
-  eval_expression_test "" "15" 
-  {|
+let eval_let_expression_tests =
+  [
+    eval_expression_test "" "1" "let a cook 1 in a";
+    eval_expression_test "" "2" "let a cook 1 in a + 1";
+    eval_expression_test "" "1" "let a cook 1 in (1)";
+    eval_expression_test "" "15"
+      {|
   let a cook 1 in
   let b cook 2 in
   let c cook 3 in
@@ -159,8 +148,8 @@ let eval_let_expression_tests = [
   let e cook 5 in
   a + b + c + d + e
   |};
-  eval_expression_test "" {|"e"|} 
-  {|
+    eval_expression_test "" {|"e"|}
+      {|
   let a cook "a" in
   let b cook "b" in
   let c cook "c" in
@@ -169,14 +158,14 @@ let eval_let_expression_tests = [
   
   if true then e else d
   |};
-  eval_expression_test "" {|5|} 
-  {|
+    eval_expression_test "" {|5|}
+      {|
   let succ cook (curry n cook n + 1) in
   let a cook 1 in
   let b cook 2 in
   succ (succ (a + b))
-  |}
-]
+  |};
+  ]
 
 let eval_tests =
   List.flatten
@@ -187,7 +176,7 @@ let eval_tests =
       eval_ternary_tests;
       eval_binop_tests;
       eval_function_tests;
-      eval_let_expression_tests
+      eval_let_expression_tests;
     ]
 
 let parse_int_tests =
@@ -315,6 +304,18 @@ let parse_float_tests =
     parse_test "parse 0.0" "0.0" (Joul 0.0);
     parse_test "parse 100.001" "100.001" (Joul 100.001);
     parse_test "parse 12345.12345" "12345.12345" (Joul 12345.12345);
+  ]
+
+let parse_bowl_tests =
+  [
+    parse_test "[  ]  should parse to []" " [  ]  " (Bowl Nil);
+    parse_test "[4] should parse to Bowl(Binop(Cons, Cal 4, Nil))" "[4]"
+      (Bowl (Binop (Cons, Cal 4, Nil)));
+    parse_test
+      "[5, \"hi\" should parse to Bowl(Binop(Cons, Cal 5, (Cons, Rcp \"hi\", \
+       Nil)))]"
+      "[5, \"hi\"]"
+      (Bowl (Binop (Cons, Cal 5, Binop (Cons, Rcp "hi", Nil))));
   ]
 
 let parse_id_tests =
@@ -455,13 +456,7 @@ let complex_parse_tests =
                 Identifier "n" ) ));
   ]
 
-
-
-
-
-let read_file_tests = [
-  read_file_test "one" "prog_one" "let a cook 1";
-]
+let read_file_tests = [ read_file_test "one" "prog_one" "let a cook 1" ]
 
 let parse_tests =
   List.flatten
@@ -477,7 +472,7 @@ let parse_tests =
       parse_ternary_tests;
       parse_bowl_tests;
       complex_parse_tests;
-      read_file_tests
+      read_file_tests;
     ]
 
 let random_tests =
@@ -500,4 +495,3 @@ let () =
     print_endline "\nRunning random tests";
     Random.self_init ();
     run_test_tt_main ("random suite" >::: random_tests))
-

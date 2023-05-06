@@ -47,11 +47,11 @@ rule read =
   | "if" { IF }
   | "then" { THEN }
   | "else" { ELSE }
+  | "()" { UNIT }
   | id { ID (Lexing.lexeme lexbuf) }
   | "\"" { read_string (Buffer.create 17) lexbuf }
   | cal { CAL (int_of_string (Lexing.lexeme lexbuf)) }
   | joul { JOUL (float_of_string (Lexing.lexeme lexbuf)) }
-  | "()" {UNIT}
   | eof { EOF }
   | _ { raise (SyntaxError ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
 
