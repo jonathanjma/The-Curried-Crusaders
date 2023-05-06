@@ -10,33 +10,126 @@ module RandomFunctionTests = struct
   type function_input =
     | Int of int
     | String of string
-    | Bool of bool
 
-  let func_1 : string = {|curry n cook n|}
-  let expectation_function_1 (x : int) = x
-  let func_2 : string = {|curry n cook n + 1|}
-  let expectation_function_2 (x : int) = x + 1
-  let func_3 : string = {|curry n cook n + 10|}
-  let expectation_function_3 (x : int) = x + 10
-  let func_4 : string = {|curry n cook n * 2|}
-  let expectation_function_4 (x : int) = x * 2
-  let func_5 : string = {|curry n cook 5 * n|}
-  let expectation_function_5 (x : int) = 5 * x
-  let func_6 : string = {|curry n cook 3 * n + 1|}
-  let expectation_function_6 (x : int) = (3 * x) + 1
-  let func_7 : string = {|curry n cook (1 + n) * n|}
-  let expectation_function_7 (x : int) = (1 + x) * x
+  let chars : string list =
+    [
+      "0";
+      "1";
+      "2";
+      "3";
+      "4";
+      "5";
+      "6";
+      "7";
+      "8";
+      "9";
+      "a";
+      "b";
+      "c";
+      "d";
+      "e";
+      "f";
+      "g";
+      "h";
+      "i";
+      "j";
+      "k";
+      "l";
+      "m";
+      "n";
+      "o";
+      "p";
+      "q";
+      "r";
+      "s";
+      "t";
+      "u";
+      "v";
+      "w";
+      "x";
+      "y";
+      "z";
+      "A";
+      "B";
+      "C";
+      "D";
+      "E";
+      "F";
+      "G";
+      "H";
+      "I";
+      "J";
+      "K";
+      "L";
+      "M";
+      "N";
+      "O";
+      "P";
+      "Q";
+      "R";
+      "S";
+      "T";
+      "U";
+      "V";
+      "W";
+      "X";
+      "Y";
+      "Z";
+    ]
+
+  let rec find_list (index : int) (lst : 'a list) =
+    match lst with
+    | [] -> failwith "empty"
+    | h :: t -> if index = 0 then h else find_list (index - 1) t
+
+  let random_char () =
+    let random_index : int = Random.int (List.length chars) in
+    find_list random_index chars
+
+  let random_string () =
+    let length : int = Random.int 100 in
+    let rec random_string (length : int) (acc : string) =
+      match length with
+      | 0 -> acc
+      | _ ->
+          let c : string = random_char () in
+          random_string (length - 1) (acc ^ c)
+    in
+
+    random_string length ""
+
+  let int_func_1 : string = {|curry n cook n|}
+  let int_expectation_function_1 (x : int) = x
+  let int_func_2 : string = {|curry n cook n + 1|}
+  let int_expectation_function_2 (x : int) = x + 1
+  let int_func_3 : string = {|curry n cook n + 10|}
+  let int_expectation_function_3 (x : int) = x + 10
+  let int_func_4 : string = {|curry n cook n * 2|}
+  let int_expectation_function_4 (x : int) = x * 2
+  let int_func_5 : string = {|curry n cook 5 * n|}
+  let int_expectation_function_5 (x : int) = 5 * x
+  let int_func_6 : string = {|curry n cook 3 * n + 1|}
+  let int_expectation_function_6 (x : int) = (3 * x) + 1
+  let int_func_7 : string = {|curry n cook (1 + n) * n|}
+  let int_expectation_function_7 (x : int) = (1 + x) * x
+  let string_func_1 : string = {|curry n cook n|}
+  let string_expectation_function_1 (x : string) = x
+  let string_func_2 : string = {|curry n cook n + "a"|}
+  let string_expectation_function_2 (x : string) = x ^ "a"
+  let string_func_3 : string = {|curry n cook n + "aa"|}
+  let string_expectation_function_3 (x : string) = x ^ "aa"
+  let string_func_4 : string = {|curry n cook "z" + n + "y"|}
+  let string_expectation_function_4 (x : string) = "z" ^ x ^ "y"
+  let add_quotes (x : string) = {|"|} ^ x ^ {|"|}
 
   let string_of_function_input : function_input -> string = function
     | Int n -> string_of_int n
-    | String s -> s
-    | Bool b -> string_of_bool b
+    | String s -> {|"|} ^ s ^ {|"|}
 
   let random_input_test (x : function_input) (function_string : string)
       (expected_output : string) =
     let expression : string =
-      {|let n cook |} ^ string_of_function_input x ^ {|in |} ^ "let f cook "
-      ^ function_string ^ "in f n"
+      "(" ^ function_string ^ ")" ^ " " ^ string_of_function_input x
     in
     eval_autonamed_string_expression_test expected_output expression
 
@@ -45,8 +138,19 @@ module RandomFunctionTests = struct
     for i = 0 to number_of_random_tests do
       let x : int = Random.int 200 in
       tests :=
-        random_input_test (Int x) func_1
+        random_input_test (Int x) func
           (x |> expectation_function |> string_of_int)
+        :: !tests
+    done;
+    !tests
+
+  let random_string_tests (func : string)
+      (expectation_function : string -> string) =
+    let tests : test list ref = ref [] in
+    for i = 0 to number_of_random_tests do
+      let x : string = random_string () in
+      tests :=
+        random_input_test (String x) func (expectation_function x |> add_quotes)
         :: !tests
     done;
     !tests
@@ -54,13 +158,17 @@ module RandomFunctionTests = struct
   let tests : test list =
     List.flatten
       [
-        random_int_tests func_1 expectation_function_1;
-        random_int_tests func_2 expectation_function_2;
-        random_int_tests func_3 expectation_function_3;
-        random_int_tests func_4 expectation_function_4;
-        random_int_tests func_5 expectation_function_5;
-        random_int_tests func_6 expectation_function_6;
-        random_int_tests func_7 expectation_function_7;
+        random_int_tests int_func_1 int_expectation_function_1;
+        random_int_tests int_func_2 int_expectation_function_2;
+        random_int_tests int_func_3 int_expectation_function_3;
+        random_int_tests int_func_4 int_expectation_function_4;
+        random_int_tests int_func_5 int_expectation_function_5;
+        random_int_tests int_func_6 int_expectation_function_6;
+        random_int_tests int_func_7 int_expectation_function_7;
+        random_string_tests string_func_1 string_expectation_function_1;
+        random_string_tests string_func_2 string_expectation_function_2;
+        random_string_tests string_func_3 string_expectation_function_3;
+        random_string_tests string_func_4 string_expectation_function_4;
       ]
 end
 
