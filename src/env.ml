@@ -1,42 +1,36 @@
 open Ast
 
-type binding_value = StandardValue of expr
+(* AF: The environment [(i1, x1); ... (in, xn)] represents the environment with
+   value [xn] bound to identifier [in]. RI: the identifier [in] can only be
+   bound to one value *)
+type t = (string * expr) list
 
-(* a closure represents the state of the environment at a certain time in the
-   program's execution*)
-and t = (string * binding_value) list
-
-let make_standard_binding_value (e : expr) = StandardValue e
-let empty = [] (* the empty environment *)
+let empty = []
 
 let rec remove_binding (binding_name : string) (env : t) : t =
   List.filter (fun (n, _) -> n <> binding_name) env
 
-let add_binding (binding_name : string) (binding_value : binding_value)
-    (env : t) =
+let add_binding (binding_name : string) (binding_value : expr) (env : t) =
   let lst = remove_binding binding_name env in
   (binding_name, binding_value) :: lst
 
-let add_binding_m (binding_name : string) (binding_value : binding_value)
+let add_binding_mut (binding_name : string) (binding_value : expr)
     (env_ref : t ref) =
   let new_env : t = add_binding binding_name binding_value !env_ref in
   env_ref := new_env
 
-let rec to_string_h : t -> string = function
+let rec to_string : t -> string = fun (env : t) -> "[" ^ to_string_h env ^ "]"
+
+and to_string_h : t -> string = function
   | [] -> ""
   | (b, v) :: remainder ->
-      let v_string : string =
-        match v with
-        | StandardValue v' -> string_of_val v'
-      in
+      let v_string : string = string_of_val v in
 
       let new_binding_string : string = "(" ^ b ^ ", " ^ v_string ^ ")" in
 
       new_binding_string ^ to_string_h remainder
 
-let to_string : t -> string = fun (env : t) -> "[" ^ to_string_h env ^ "]"
-
-let rec get_binding (binding_name : string) (env : t) : binding_value option =
+let rec get_binding (binding_name : string) (env : t) : expr option =
   match env with
   | [] -> None
   | (name, value) :: remaining_bindings ->
@@ -46,12 +40,11 @@ let rec get_binding (binding_name : string) (env : t) : binding_value option =
 let rec to_expr_list (env' : t) =
   match env' with
   | [] -> []
-  | (name, value) :: remaining_bindings -> (
-      match value with
-      | StandardValue v -> (name, v) :: to_expr_list remaining_bindings)
+  | (name, value) :: remaining_bindings ->
+      (name, value) :: to_expr_list remaining_bindings
 
 let rec to_env (lst : (string * expr) list) : t =
   match lst with
   | [] -> []
   | (name, expr) :: remaining_bindings ->
-      (name, StandardValue expr) :: to_env remaining_bindings
+      (name, expr) :: to_env remaining_bindings

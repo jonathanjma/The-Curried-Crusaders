@@ -11,7 +11,6 @@ let id = (letter) (letter|digit|'_')*
 
 let cal =  digit+
 let joul =  digit+ '.' digit+
-let ing = letter+
 let rcp = letter+
 
 rule read =
@@ -41,16 +40,18 @@ rule read =
   | "PIE" { PIE }
   | "cook" { COOK }
   | "curry" { CURRY }
+  | "print" { PRINT }
+  | "println" { PRINTLN }
   | "let" { LET }
   | "in" { IN }
   | "if" { IF }
   | "then" { THEN }
   | "else" { ELSE }
+  | "()" { UNIT }
   | id { ID (Lexing.lexeme lexbuf) }
   | "\"" { read_string (Buffer.create 17) lexbuf }
   | cal { CAL (int_of_string (Lexing.lexeme lexbuf)) }
   | joul { JOUL (float_of_string (Lexing.lexeme lexbuf)) }
-  | "()" {UNIT}
   | eof { EOF }
   | _ { raise (SyntaxError ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
 
