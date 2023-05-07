@@ -47,9 +47,11 @@ let rec big_step (expression, env) : expr * Env.t =
       (FunctionClosure (Env.to_expr_list env, Function (p, f)), env)
   | Unop (op, e1) -> big_step (step_unop op e1 env, env)
   | Binop (bop, e1, e2) ->
-      let v1, _ = big_step (e1, env) in
-      let v2, _ = big_step (e2, env) in
-      big_step (step_binop bop v1 v2, env)
+      if bop = And || bop = Or then step_bool_op bop e1 e2 env
+      else
+        let v1, _ = big_step (e1, env) in
+        let v2, _ = big_step (e2, env) in
+        big_step (step_binop bop v1 v2, env)
   | Ternary (b1, e1, e2) -> big_step (step_ternary b1 e1 e2 env, env)
   | LetExpression (name, e1, e2) ->
       let v1, _ = big_step (e1, env) in
@@ -93,6 +95,20 @@ and step_binop bop e1 e2 =
   | Leq, e1, e2 -> handleComparison (e1, e2) ( <= )
   | Geq, e1, e2 -> handleComparison (e1, e2) ( >= )
   | _ -> failwith "step_binop unimplemented (not a binary operator?)"
+
+and step_bool_op bop e1 e2 env =
+  let v1, env' = big_step (e1, env) in
+  match (bop, v1) with
+  | And, Bool b ->
+      if not b then (Bool false, env')
+      else
+        let Bool b2, env'' = big_step (e2, env') in
+        if b2 then (Bool b2, env'') else (Bool false, env'')
+  | Or, Bool b ->
+      if b then (Bool true, env')
+      else
+        let Bool b2, env'' = big_step (e2, env') in
+        if b2 then (Bool b2, env'') else (Bool false, env'')
 
 and step_identifier name env =
   match Env.get_binding name env with

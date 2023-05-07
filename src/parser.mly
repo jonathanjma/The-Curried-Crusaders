@@ -33,6 +33,8 @@ open Ast
 %token LEQ
 %token EQUAL
 %token BOOLNEGATION
+%token AND
+%token OR
 
 %token LET
 %token COOK
@@ -51,6 +53,8 @@ open Ast
 
 %right FORK
 %right CONS
+%left OR
+%left AND
 %left EQUAL
 %left GREATER LESS GEQ LEQ
 %left PLUS SUBTRACT 
@@ -130,6 +134,8 @@ function_app:
 | CONS { Cons }
 | MOD { Mod }
 | FORK { Fork }
+| OR { Or }
+| AND { And }
 
 %inline uop:
 | BOOLNEGATION { Boolnegation }

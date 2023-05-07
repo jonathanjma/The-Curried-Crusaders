@@ -12,6 +12,8 @@ type bop =
   | Geq
   | Equal
   | Mod
+  | Or 
+  | And
 
 (** The type of unary operators *)
 type unop =
@@ -34,7 +36,8 @@ let bop_to_string : bop -> string = function
   | Geq -> "GEQ"
   | Equal -> "EQUAL"
   | Mod -> "MOD"
-
+  | Or -> "OR"
+  | And -> "AND"
 (** Converts unary operator to string *)
 let unop_to_string : unop -> string = function
   | Unegation -> "UNEGATION"
@@ -75,6 +78,8 @@ let string_of_bop = function
   | Greater -> ">"
   | Less -> "<"
   | Mod -> "mod"
+  | And -> "&"
+  | Or -> "|"
 
 (** Converts an expression to a string *)
 let rec string_of_val (e : expr) : string =

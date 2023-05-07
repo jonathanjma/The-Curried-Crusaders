@@ -37,11 +37,13 @@ rule read =
   | "=" { EQUAL }
   | "%" { MOD }
   | "," { COMMA }
+  | "&" { AND }
+  | "|" { OR }
   | "PIE" { PIE }
   | "cook" { COOK }
   | "curry" { CURRY }
   | "print" { PRINT }
-  | "println" { PRINTLN }
+  | "println" { PRINTLN } 
   | "let" { LET }
   | "in" { IN }
   | "if" { IF }
