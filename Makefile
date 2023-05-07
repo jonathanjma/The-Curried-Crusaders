@@ -7,6 +7,9 @@ utop:
 ustove:
 	OCAMLRUNPARAM=b dune exec bin/ustove.exe
 
+mealguess:
+	dune exec bin/mealguess.exe
+
 .PHONY: test
 test:
 	dune exec test/main.exe
