@@ -15,7 +15,7 @@ cook:
 
 .PHONY: test
 test:
-	dune exec test/main.exe
+	dune exec test/test.exe
 
 clean: bisect-clean
 	dune clean
@@ -25,7 +25,7 @@ zip:
 	zip -r iCook.zip . -x@exclude.lst
 
 bisect: bisect-clean
-	-dune exec --instrument-with bisect_ppx test/main.exe
+	-dune exec --instrument-with bisect_ppx test/test.exe
 	bisect-ppx-report html
 
 bisect-clean:
