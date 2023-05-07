@@ -2,7 +2,7 @@
 type bop =
   | Add
   | Mult
-  | Fork (* Fork is the xor operator (xor logic gate looks like fork) *)
+  | Fork
   | Subtract
   | Divide
   | Cons
@@ -15,11 +15,12 @@ type bop =
 
 (** The type of unary operators *)
 type unop =
-  | Unegation
-  | Boolnegation  (** The type of the abstract syntax tree (AST). *)
-(* Unegation represents unary negation *)
+  | Print (* print string operator *)
+  | Println  (** println operator *)
+  | Unegation (* unary negation *)
+  | Boolnegation (* boolean negation *)
 
-(** Converts binary operator to string **)
+(** Converts a binary operator type to its name *)
 let bop_to_string : bop -> string = function
   | Add -> "ADD"
   | Mult -> "MULT"
@@ -34,17 +35,18 @@ let bop_to_string : bop -> string = function
   | Equal -> "EQUAL"
   | Mod -> "MOD"
 
-(** Converts unary operator to string **)
+(** Converts unary operator to string *)
 let unop_to_string : unop -> string = function
   | Unegation -> "UNEGATION"
   | Boolnegation -> "BOOLNEGATION"
+  | Println -> "PRINTLN"
+  | Print -> "PRINT"
 
-(** The type of expressions. **)
+(** The type of expressions *)
 type expr =
   | Cal of int
   | Joul of float
   | Rcp of string
-  | Ing of string
   | Unit
   | Unop of unop * expr
   | Bool of bool
@@ -59,6 +61,7 @@ type expr =
   | FunctionApp of expr * expr
   | Ternary of expr * expr * expr
 
+(** Converts a binary operator to a string *)
 let string_of_bop = function
   | Add -> "+"
   | Mult -> "*"
@@ -73,6 +76,7 @@ let string_of_bop = function
   | Less -> "<"
   | Mod -> "mod"
 
+(** Converts an expression to a string *)
 let rec string_of_val (e : expr) : string =
   match e with
   | Cal c -> string_of_int c

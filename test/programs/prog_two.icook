@@ -1,0 +1,4 @@
+let f cook curry n cook n + 1
+let a cook f 41
+let b cook 27 + a
+print b

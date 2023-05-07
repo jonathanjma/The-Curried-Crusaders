@@ -6,3 +6,8 @@
 (executable
  (name mealguess)
  (modules mealguess))
+
+(executable
+ (name cook)
+ (modules cook)
+ (libraries Interp))

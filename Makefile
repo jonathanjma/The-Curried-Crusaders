@@ -9,6 +9,9 @@ ustove:
 
 mealguess:
 	dune exec bin/mealguess.exe
+	
+cook:
+	OCAMLRUNPARAM=b dune exec bin/cook.exe
 
 .PHONY: test
 test:
