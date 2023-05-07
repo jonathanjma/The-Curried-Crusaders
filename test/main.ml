@@ -328,7 +328,6 @@ let eval_let_expression_tests =
   let b cook 2 in
   succ (succ (a + b))
   |};
-    |};
   ]
 
 let eval_tests =
