@@ -1,3 +1,13 @@
 (executable
  (name ustove)
- (libraries Interp ANSITerminal))
+ (modules ustove)
+ (libraries Interp lambda-term))
+
+(executable
+ (name mealguess)
+ (modules mealguess))
+
+(executable
+ (name cook)
+ (modules cook)
+ (libraries Interp))

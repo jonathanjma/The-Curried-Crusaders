@@ -23,10 +23,31 @@ let eval_string_expression_test name expected_output string_expression =
   name >:: fun _ ->
   assert_equal expected_output (interp string_expression) ~printer:id
 
+let icook_str_of_int n1 =
+  let n1_str = string_of_int n1 in
+  if n1 >= 0 then n1_str
+  else "~" ^ String.sub n1_str 1 (String.length n1_str - 1)
+
+let read_file_test (name : string) (rel_dir : string) (expected_output : string)
+    =
+  name >:: fun _ ->
+  let dir : string = "test/programs/" ^ rel_dir ^ ".icook" in
+  assert_equal (Filereader.read dir) expected_output
+
+(** This function creates a test with an automated name. Its first paremeter is
+    the expected output and the second parameter is the string expression. The
+    automaterd name of the test is "[string expression] should parse to
+    [expected output]" *)
 let eval_autonamed_string_expression_test expected_output string_expression =
   eval_string_expression_test
     (string_expression ^ " should parse to " ^ expected_output)
     expected_output string_expression
+
+let env_equality_test expected_env string_expression =
+  eval_string_expression_test
+    (string_expression ^ " should produce the env " ^ Env.to_string expected_env)
+    (Env.to_string expected_env)
+    (Env.to_string !Main.global_env)
 
 let parse_test (name : string) (input : string) (expected_output : Ast.expr) =
   name >:: fun _ -> assert_equal (parse input) expected_output
@@ -239,8 +260,9 @@ let eval_string_tests =
     eval_autonamed_string_expression_test "\"2a31\"" "1 + 1 + \"a\" + 3 + 1";
     eval_autonamed_string_expression_test "\"2.a1.110\""
       "2.0 + \"a\" +  1.1  + \"1\" + 0";
-    (*eval_autonamed_string_expression_test ("so true that PI(E) = " ^
-      string_of_float Float.pi) "\"so \" + true + \" that PI(E) = \" + PIE";*)
+    eval_autonamed_string_expression_test
+      ("so true that PI(E) = " ^ string_of_float Float.pi)
+      "\"so \" + true + \" that PI(E) = \" + PIE";
   ]
 
 let eval_ternary_tests =
@@ -272,6 +294,64 @@ let eval_binop_tests =
       "3.0 + 5.0 * 2 / 1.0 / 2";
   ]
 
+let eval_function_tests =
+  [
+    eval_autonamed_string_expression_test "2" "(curry x cook x+1) 1";
+    eval_autonamed_string_expression_test "-1"
+      "(curry x cook (curry y cook y-x) 2) 3";
+    eval_autonamed_string_expression_test "4"
+      "(curry x cook (curry x cook x+x) 2) 1";
+    eval_autonamed_string_expression_test "true" "(curry x cook (x % 2 = 0)) 10";
+    eval_autonamed_string_expression_test "24"
+      {|
+      (curry x cook (curry y cook (curry z cook x*y*z) 2) 3) 4
+    |};
+    eval_autonamed_string_expression_test "24."
+      {|
+     (curry x cook (curry y cook (curry z cook x*y*z) 2.0) 3) 4.0 |};
+    eval_autonamed_string_expression_test "42"
+      {|
+    let inc cook (curry x cook x+1) in (
+      let double cook (curry x cook x*2) in (
+        double (inc (inc 19))
+      )
+    )
+      |};
+  ]
+
+let eval_let_expression_tests =
+  [
+    eval_expression_test "" "1" "let a cook 1 in a";
+    eval_expression_test "" "2" "let a cook 1 in a + 1";
+    eval_expression_test "" "1" "let a cook 1 in (1)";
+    eval_expression_test "" "15"
+      {|
+  let a cook 1 in
+  let b cook 2 in
+  let c cook 3 in
+  let d cook 4 in
+  let e cook 5 in
+  a + b + c + d + e
+  |};
+    eval_expression_test "" {|"e"|}
+      {|
+  let a cook "a" in
+  let b cook "b" in
+  let c cook "c" in
+  let d cook "d" in
+  let e cook "e" in
+
+  if true then e else d
+  |};
+    eval_expression_test "" {|5|}
+      {|
+  let succ cook (curry n cook n + 1) in
+  let a cook 1 in
+  let b cook 2 in
+  succ (succ (a + b))
+  |};
+  ]
+
 let eval_tests =
   List.flatten
     [
@@ -280,6 +360,8 @@ let eval_tests =
       eval_string_tests;
       eval_ternary_tests;
       eval_binop_tests;
+      eval_function_tests;
+      eval_let_expression_tests;
     ]
 
 let parse_int_tests =
@@ -422,6 +504,18 @@ let parse_float_tests =
     parse_test "parse 12345.12345" "12345.12345" (Joul 12345.12345);
   ]
 
+let parse_bowl_tests =
+  [
+    parse_test "[  ]  should parse to []" " [  ]  " (Bowl Nil);
+    parse_test "[4] should parse to Bowl(Binop(Cons, Cal 4, Nil))" "[4]"
+      (Bowl (Binop (Cons, Cal 4, Nil)));
+    parse_test
+      "[5, \"hi\" should parse to Bowl(Binop(Cons, Cal 5, (Cons, Rcp \"hi\", \
+       Nil)))]"
+      "[5, \"hi\"]"
+      (Bowl (Binop (Cons, Cal 5, Binop (Cons, Rcp "hi", Nil))));
+  ]
+
 let parse_id_tests =
   [
     parse_test "parse n" "n" (Identifier "n");
@@ -561,6 +655,8 @@ let complex_parse_tests =
                 Identifier "n" ) ));
   ]
 
+let read_file_tests = [ read_file_test "one" "prog_one" "let a cook 1" ]
+
 let parse_tests =
   List.flatten
     [
@@ -575,6 +671,7 @@ let parse_tests =
       parse_ternary_tests;
       parse_bowl_tests;
       complex_parse_tests;
+      read_file_tests;
     ]
 
 let random_tests =
@@ -584,9 +681,14 @@ let random_tests =
       random_parse_int_tests number_of_random_tests;
       random_parse_float_tests number_of_random_tests;
       random_parse_binop_tests number_of_random_tests;
+      random_eval_comparison_tests number_of_random_tests;
+      random_eval_binop_tests number_of_random_tests;
+      random_let_expr_test number_of_random_tests;
+      random_let_def_test number_of_random_tests
+      (* RandomFunctionTests.tests; *);
     ]
 
-let tests = List.flatten [ eval_tests; parse_tests; RandomFunctionTests.tests ]
+let tests = List.flatten [ eval_tests; parse_tests ]
 
 let () =
   print_endline "\n\nRunning main test suite";

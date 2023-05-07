@@ -2,7 +2,7 @@
 type bop =
   | Add
   | Mult
-  | Fork (* Fork is the xor operator (xor logic gate looks like fork) *)
+  | Fork
   | Subtract
   | Divide
   | Cons
@@ -11,11 +11,16 @@ type bop =
   | Leq
   | Geq
   | Equal
+  | Mod
 
 (** The type of unary operators *)
-type unop = Unegation  (** The type of the abstract syntax tree (AST). *)
-(* Unegation represents unary negation *)
+type unop =
+  | Print (* print string operator *)
+  | Println  (** println operator *)
+  | Unegation (* unary negation *)
+  | Boolnegation (* boolean negation *)
 
+(** Converts a binary operator type to its name *)
 let bop_to_string : bop -> string = function
   | Add -> "ADD"
   | Mult -> "MULT"
@@ -28,15 +33,20 @@ let bop_to_string : bop -> string = function
   | Leq -> "LEQ"
   | Geq -> "GEQ"
   | Equal -> "EQUAL"
+  | Mod -> "MOD"
 
+(** Converts unary operator to string *)
 let unop_to_string : unop -> string = function
   | Unegation -> "UNEGATION"
+  | Boolnegation -> "BOOLNEGATION"
+  | Println -> "PRINTLN"
+  | Print -> "PRINT"
 
+(** The type of expressions *)
 type expr =
   | Cal of int
   | Joul of float
   | Rcp of string
-  | Ing of string
   | Unit
   | Unop of unop * expr
   | Bool of bool
@@ -46,10 +56,27 @@ type expr =
   | LetExpression of string * expr * expr
   | LetDefinition of string * expr
   | Function of string * expr
+  | FunctionClosure of (string * expr) list * expr
   | Identifier of string
   | FunctionApp of expr * expr
   | Ternary of expr * expr * expr
 
+(** Converts a binary operator to a string *)
+let string_of_bop = function
+  | Add -> "+"
+  | Mult -> "*"
+  | Fork -> "fk"
+  | Subtract -> "-"
+  | Divide -> "/"
+  | Cons -> "::"
+  | Geq -> ">="
+  | Leq -> "<="
+  | Equal -> "="
+  | Greater -> ">"
+  | Less -> "<"
+  | Mod -> "mod"
+
+(** Converts an expression to a string *)
 let rec string_of_val (e : expr) : string =
   match e with
   | Cal c -> string_of_int c
@@ -62,8 +89,11 @@ let rec string_of_val (e : expr) : string =
       | Nil -> "[]"
       | _ -> "[" ^ string_of_bowl b ^ "]")
   | Nil -> "[]"
-  | Binop _ -> failwith "string of val Precondition violated"
-  | _ -> failwith "string of val Unimplemented"
+  | Binop (binop, e1, e2) -> string_of_val e1 ^ ""
+  | Function (p, e) | FunctionClosure (_, Function (p, e)) ->
+      "Function: f(" ^ p ^ ") = " ^ string_of_val e
+  | Identifier s -> s
+  | _ -> failwith "string_of_val unimplemented"
 
 and string_of_bowl b =
   let rec string_of_bowl_tr acc = function
