@@ -40,7 +40,7 @@ module UStove = struct
               let eval =
                 if state'.mode < 2 then "  " ^ show_eval parsed else ""
               in
-              ignore (show_eval parsed);
+              if state'.mode >= 2 then ignore (show_eval parsed);
               (state', ast_pp ^ eval))
 
   (* Evaulate a command *)

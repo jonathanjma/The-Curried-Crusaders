@@ -124,6 +124,7 @@ and step_binop bop e1 e2 =
     second expression. Evaluates [e1 :: e2]. Requires: [e2] is of type Bowl *)
 and step_cons (v1, v2) =
   match v2 with
+  | Bowl [] -> Bowl [ v1 ]
   | Bowl lstItem -> Bowl (v1 :: lstItem)
   | _ -> failwith "step_cons Precondition violated"
 
