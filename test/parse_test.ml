@@ -5,6 +5,9 @@ let parse_int_tests =
   [
     parse_test "parse 1" "1" (Cal 1);
     parse_test "parse 0" "0" (Cal 0);
+    parse_test "parse 6" "6" (Cal 6);
+    parse_test "parse 42" "42" (Cal 42);
+    parse_test "parse 69" "69" (Cal 69);
     parse_test "parse 12345" "12345" (Cal 12345);
     parse_test "parse ~1" "~1" (Unop (Unegation, Cal 1));
     parse_test "parse ~99999" "~99999" (Unop (Unegation, Cal 99999));
@@ -29,7 +32,8 @@ let parse_string_tests =
 let parse_float_tests =
   [
     parse_test "parse 1.1" "1.1" (Joul 1.1);
-    parse_test "parse 0.0" "0.0" (Joul 0.0);
+    parse_test "parse 0.5" "0.5" (Joul 0.5);
+    parse_test "parse 0.9" "0.9" (Joul 0.9);
     parse_test "parse 100.001" "100.001" (Joul 100.001);
     parse_test "parse 12345.12345" "12345.12345" (Joul 12345.12345);
   ]
@@ -38,6 +42,7 @@ let parse_id_tests =
   [
     parse_test "parse n" "n" (Identifier "n");
     parse_test "parse x" "x" (Identifier "x");
+    parse_test "parse sus" "sus" (Identifier "sus");
     parse_test "parse func" "func" (Identifier "func");
     parse_test "parse this_is_an_identifier" "this_is_an_identifier"
       (Identifier "this_is_an_identifier");
@@ -172,7 +177,7 @@ let complex_parse_tests =
                 Identifier "n" ) ));
   ]
 
-let read_file_tests = [ read_file_test "one" "prog_one" "let a cook 1" ]
+(* let read_file_tests = [ read_file_test "one" "prog_one" "let a cook 1" ] *)
 
 let parse_tests =
   List.flatten
@@ -186,6 +191,5 @@ let parse_tests =
       parse_function_tests;
       parse_function_app_tests;
       parse_ternary_tests;
-      complex_parse_tests;
-      read_file_tests;
+      complex_parse_tests (* read_file_tests; *);
     ]

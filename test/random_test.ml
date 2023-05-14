@@ -11,81 +11,12 @@ module RandomFunctionTests = struct
     | Int of int
     | String of string
 
-  let chars : string list =
-    [
-      "0";
-      "1";
-      "2";
-      "3";
-      "4";
-      "5";
-      "6";
-      "7";
-      "8";
-      "9";
-      "a";
-      "b";
-      "c";
-      "d";
-      "e";
-      "f";
-      "g";
-      "h";
-      "i";
-      "j";
-      "k";
-      "l";
-      "m";
-      "n";
-      "o";
-      "p";
-      "q";
-      "r";
-      "s";
-      "t";
-      "u";
-      "v";
-      "w";
-      "x";
-      "y";
-      "z";
-      "A";
-      "B";
-      "C";
-      "D";
-      "E";
-      "F";
-      "G";
-      "H";
-      "I";
-      "J";
-      "K";
-      "L";
-      "M";
-      "N";
-      "O";
-      "P";
-      "Q";
-      "R";
-      "S";
-      "T";
-      "U";
-      "V";
-      "W";
-      "X";
-      "Y";
-      "Z";
-    ]
-  (* OCamlFormat made it like this *)
-
   let rec find_list (index : int) (lst : 'a list) =
     match lst with
     | [] -> failwith "empty"
     | h :: t -> if index = 0 then h else find_list (index - 1) t
 
-  let random_char () =
-    let random_index : int = Random.int (List.length chars) in
-    find_list random_index chars
+  let random_char _ = String.make 1 (Char.chr (48 + Random.int 42))
 
   let random_string () =
     let length : int = Random.int 100 in

@@ -1,5 +1,5 @@
-let f cook 
+let succ cook 
   curry n cook n + 1.
-let a cook f 41.
+let a cook succ 41.
 let b cook 27 + a.
-let x cook print b.
+let x cook print ("Cooked value: " + b).
