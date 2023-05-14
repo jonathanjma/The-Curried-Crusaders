@@ -34,14 +34,6 @@ let parse_float_tests =
     parse_test "parse 12345.12345" "12345.12345" (Joul 12345.12345);
   ]
 
-let parse_bowl_tests =
-  [ (* TODO rewrite *)
-    (* parse_test "[ ] should parse to []" " [ ] " (Bowl Nil); parse_test "[4]
-       should parse to Bowl(Binop(Cons, Cal 4, Nil))" "[4]" (Bowl (Binop (Cons,
-       Cal 4, Nil))); parse_test "[5, \"hi\" should parse to Bowl(Binop(Cons,
-       Cal 5, (Cons, Rcp \"hi\", \ Nil)))]" "[5, \"hi\"]" (Bowl (Binop (Cons,
-       Cal 5, Binop (Cons, Rcp "hi", Nil)))); *) ]
-
 let parse_id_tests =
   [
     parse_test "parse n" "n" (Identifier "n");
@@ -194,7 +186,6 @@ let parse_tests =
       parse_function_tests;
       parse_function_app_tests;
       parse_ternary_tests;
-      parse_bowl_tests;
       complex_parse_tests;
       read_file_tests;
     ]
