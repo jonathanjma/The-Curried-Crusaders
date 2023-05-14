@@ -5,13 +5,13 @@ utop:
 	dune utop src
 
 ustove:
-	OCAMLRUNPARAM=b dune exec bin/ustove.exe
+	dune exec bin/ustove.exe
 
 mealguess:
 	dune exec bin/mealguess.exe
 	
-cook:
-	OCAMLRUNPARAM=b dune exec bin/cook.exe
+menu:
+	dune exec bin/menu.exe
 
 .PHONY: test
 test:

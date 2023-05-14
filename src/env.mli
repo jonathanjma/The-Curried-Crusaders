@@ -1,8 +1,14 @@
+(** [env.ml] is a module that is responsible for abstracting operations on an
+    iCook environment. This module includes functions to add bindings, remove
+    bindings, get binding values, convert an environment to a list, convert an
+    association list to an environment and mutate an environment using a
+    reference. *)
+
 type t
-(** The type of the environment *)
+(** The type of the environment. *)
 
 val empty : t
-(** The empty environment *)
+(** The empty environment. *)
 
 val remove_binding : string -> t -> t
 (** [remove_binding n env] is environment [env] without any bindings of the name

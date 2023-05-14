@@ -15,13 +15,13 @@ let rec generate_command state =
         "let x cook " ^ string_of_int a1 ^ " in " ^ "x + " ^ string_of_int a2
       in
       if state.mode = 0 then (str, a1 + a2)
-      else (Interp.Print.pretty_print (Interp.Main.parse str) 1, a1 + a2)
+      else (Print.pretty_print (Main.parse str) 1, a1 + a2)
   | 1 | 2 ->
       let a1 = Random.int 100 in
       let txt, v = generate_expr "x" a1 state in
       let str = "let x cook " ^ string_of_int a1 ^ " in " ^ txt in
       if state.mode = 0 then (str, v)
-      else (Interp.Print.pretty_print (Interp.Main.parse str) 1, v)
+      else (Print.pretty_print (Main.parse str) 1, v)
   | 3 | 4 | 5 ->
       let a1 = Random.int 100 in
       let a, b =
@@ -29,7 +29,7 @@ let rec generate_command state =
       in
       let str = "let x cook " ^ string_of_int a1 ^ " in " ^ a in
       if state.mode = 0 then (str, b)
-      else (Interp.Print.pretty_print (Interp.Main.parse str) 1, b)
+      else (Print.pretty_print (Main.parse str) 1, b)
   | 6 | 7 ->
       let a1 = Random.int 100 in
       let a, b =
@@ -37,7 +37,7 @@ let rec generate_command state =
       in
       let str = "let x cook " ^ string_of_int a1 ^ " in (" ^ a ^ ") + x" in
       if state.mode = 0 then (str, a1 + b)
-      else (Interp.Print.pretty_print (Interp.Main.parse str) 1, a1 + b)
+      else (Print.pretty_print (Main.parse str) 1, a1 + b)
   | 8 ->
       let a1 = Random.int 10 + 1 in
       let a, b =
@@ -45,7 +45,7 @@ let rec generate_command state =
       in
       let str = "let x cook " ^ string_of_int a1 ^ " in (" ^ a ^ ") % x" in
       if state.mode = 0 then (str, b mod a1)
-      else (Interp.Print.pretty_print (Interp.Main.parse str) 1, b mod a1)
+      else (Print.pretty_print (Main.parse str) 1, b mod a1)
   | _ ->
       let a1 = Random.int 100 in
       let a, b =
@@ -53,7 +53,7 @@ let rec generate_command state =
       in
       let str = "let x cook " ^ string_of_int a1 ^ " in (" ^ a ^ ") * x" in
       if state.mode = 0 then (str, a1 * b)
-      else (Interp.Print.pretty_print (Interp.Main.parse str) 1, a1 * b)
+      else (Print.pretty_print (Main.parse str) 1, a1 * b)
 
 and generate_expr var_name var_val state =
   Random.self_init ();

@@ -35,6 +35,7 @@ open Ast
 %token BOOLNEGATION
 %token AND
 %token OR
+%token END
 
 %token LET
 %token COOK
@@ -61,18 +62,23 @@ open Ast
 %left TIMES DIVIDE MOD
 %right UNEGATION BOOLNEGATION PRINT PRINTLN
 
-%start <Ast.expr> prog
+%start <Ast.defn list> prog
+%start <Ast.expr> top_expr
 
 %{
 let rec desugar_list lst = 
   match lst with
-  | [] -> Nil
+  | [] -> Bowl []
   | h :: t -> Binop (Cons, h, desugar_list t)
 %}
 
 %%
 
 prog:
+  | def = let_defn_file+; EOF { def }
+  ;
+
+top_expr:
   | e = expr; EOF { e }
   ;
 
@@ -94,6 +100,10 @@ let_defn:
   | LET; n = ID; COOK; e = expr { LetDefinition (n, e) }
   ;
 
+let_defn_file:
+  | LET; n = ID; COOK; e = expr; END { LetDef (n, e) }
+  ;
+
 ternary_expr:
   | IF; p = expr; THEN; e1 = expr; ELSE; e2 = expr { Ternary (p, e1, e2) }
   ;
@@ -108,7 +118,7 @@ value:
   | PIE { Joul Float.pi }
   | TRUE { Bool true }
   | FALSE { Bool false }
-  | LBRAC; elts = separated_list(COMMA, value); RBRAC { Bowl (desugar_list elts) }
+  | LBRAC; elts = separated_list(COMMA, value); RBRAC { desugar_list elts }
   | f = function_value {f}
   | a = function_app {a}
   ;

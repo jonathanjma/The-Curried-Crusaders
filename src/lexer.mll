@@ -39,6 +39,7 @@ rule read =
   | "," { COMMA }
   | "&" { AND }
   | "|" { OR }
+  | "." { END }
   | "PIE" { PIE }
   | "cook" { COOK }
   | "curry" { CURRY }

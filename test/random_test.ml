@@ -76,6 +76,7 @@ module RandomFunctionTests = struct
       "Y";
       "Z";
     ]
+  (* OCamlFormat made it like this *)
 
   let rec find_list (index : int) (lst : 'a list) =
     match lst with

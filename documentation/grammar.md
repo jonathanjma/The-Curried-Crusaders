@@ -61,12 +61,9 @@ a valid cal must be between −2^30 and 2^30−1
   - evaluate e2 to a value v2
   - e1: 'a iff e2: 'a
 - dynamic semantics
-  - evaluate `e1` to a value `v1`
-  - evaluate `e2` to a value `v2`
-  - evaluate `e3` to a value `v3`
-  - if `v1` is true, then `if e1 then e2 else e3` evaluates to `v2`
-  - if `v2` is false, then if `e1 then e2 else e3` evaluates to `v3`
-
+  - evaluate `e1` to a value `v1`.
+  - If `v1` steps to `true`, evaluate `e2` to a stepped expression `v2`, and then return `v2`.
+  - Otherwise, evaluate `e1` to a stepped expression `v1`, and then return `v1`.
 
 \<function_app> ::= \<expr> \<expr>
 
@@ -82,31 +79,22 @@ a valid cal must be between −2^30 and 2^30−1
   - evalute e2 to a value v2
   - evalute f1 v2 using the the definition of f
 
+\<unit> ::= `()`
 
-
-# Not implemented
-
-\<unit> ::= `unit()`
-
-\<bop> ::= `+` | `-` | `*` | `/` | `fk` | `|` | `&` | `=` | `bs`
-
+\<bop> ::= `+` | `-` | `*` | `/` | `fk` | `|` | `&` | `=` | `bs` | `::` | `%`
 - fk is short for fork, the bitwise XOR operator in our language.
 - bs is short for brussel sprouts, it is the not equals operator.
+
 
 \<bowl> ::= `[` \<expr>\* `,` \<expr>* `]` 
 
 
 
-\<if expression> ::= `if` \<expr> `then` \<expr>
-
-`if p then e`
-- static semantics
-  - `p` evaluates to either true or false
-  - `e` evaluates to unit
-- dynamic semantics
-  - evaluate p to a value v
-  - if v is true, then evaluate e to a value unit
-  - if p then e1 evaluates to unit
 
 
-\<module_decl> ::= `shelf` \<rcp> `build` \<decl>\* `end`
+
+
+
+
+
+

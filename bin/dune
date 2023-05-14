@@ -9,6 +9,6 @@
  (libraries Interp))
 
 (executable
- (name cook)
- (modules cook)
+ (name menu)
+ (modules menu)
  (libraries Interp))
