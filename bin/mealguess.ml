@@ -98,7 +98,7 @@ and generate_expr var_name var_val state =
       ("let y cook " ^ string_of_int a2 ^ " in x + 2 * y", var_val + (2 * a2))
 
 let rec take_commands state =
-  print_endline "Guess the meal cooked by these ingredients! \n";
+  print_endline "\nGuess the meal cooked by these ingredients! \n";
   let quest, res = generate_command state in
   let _ = print_endline ("Expression: \n" ^ quest ^ "\n") in
   match_input quest res state
@@ -110,7 +110,7 @@ and match_input quest res state =
       if String.get input 0 = '#' then
         mealguess_commands state (String.sub input 1 (String.length input - 1))
       else if input = string_of_int res then (
-        print_endline "Correct! You guessed the meal that was cooked! \n";
+        print_endline "Correct! You guessed the meal that was cooked!";
         let state' = { state with ctr = state.ctr + 1 } in
         let _ =
           print_endline
@@ -120,7 +120,7 @@ and match_input quest res state =
         take_commands { state with ctr = state.ctr + 1 })
       else (
         print_endline
-          ("Incorrect! \n\nThe correct answer is " ^ string_of_int res ^ ".\n");
+          ("Incorrect! \n\nThe correct answer is " ^ string_of_int res ^ ".");
         let state' = { state with ctr = max (state.ctr - 1) 0 } in
         print_endline
           ("You have " ^ string_of_int state'.ctr
@@ -129,7 +129,9 @@ and match_input quest res state =
 
 and mealguess_commands state inp =
   match inp with
-  | "quit" -> Stdlib.exit 0
+  | "quit" ->
+      print_endline "Thanks for playing!";
+      Stdlib.exit 0
   | "mg_help" ->
       print_endline
         "To play Guess the Meal, enter the corresponding value that \
@@ -137,7 +139,9 @@ and mealguess_commands state inp =
          For instance, if given the expression \"let x cook 1 in x + 1\", \
          answering \"2\" would give you a point. If you answer incorrectly, \
          you will lose a point.\n\n\
-         Try to get as many points as possible to be a professional iCook Chef! \n";
+         Try to get as many points as possible to be a professional iCook \
+         Chef! \n\n\
+        \ ------------------- \n";
       take_commands state
   | "reset" ->
       let _ = Sys.command "clear" in
@@ -153,7 +157,8 @@ and mealguess_commands state inp =
          printed parse)\n\
          #difficulty [x] : changes difficulty mode (0 = easy (no recursion), 1 \
          = normal (some recursion and scopes) - default, 2 = hard (a lot of \
-         recursion and scopes))";
+         recursion and scopes))\n\n\
+        \ ------------------- \n";
       take_commands state
   | "mode 0" ->
       print_endline "mode 0 set";
