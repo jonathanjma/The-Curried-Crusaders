@@ -4,5 +4,5 @@
 3. After extracting the zip file, you should see a folder called "iCook". Copy the path to the iCook folder.
 4. Open your terminal.
 5. Change the directory of your terminal to the project, by typing `cd PATH_NAME` where `PATH_NAME`is the name of the path to the "iCook" folder that you copied.
-6. Type `make ustove` into the terminal to start ustove, a playground inspired by utop to **parse** expressions. We have not fully implemented evaluation of expressions, and currently ustove only shows how expressions are parsed.
+6. Type `make ustove` into the terminal to start ustove, a playground inspired by utop to evaluate iCook expressions.
 7. View the grammar of the language [here](./grammar.md) to learn about the syntax of iCook and what expressions you can try using ustove.

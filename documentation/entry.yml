@@ -13,11 +13,11 @@ pm:
   netid: rm697
 publish: true
 title: "iCook"
-git-repo: "https://github.com/jonathanjma/CS3110-Final-Project"
+git-repo: "https://github.com/jonathanjma/iCook"
 demo-video-url: ""
 desc: >
   Our vision is to make a fully-featured programming language centered around
   the ideas of cooking. We have cooking styled syntax and lots of fun cooking 
-  puns for the client to discover. Eventually, we want to use our programming 
-  language to implement a simple text-based cooking game into our language. The 
-  main goal is to successfully create a programming language that is usable.
+  puns for the client to discover. We also created an interactive REPL called
+  ustove and implemented a fun programming game called MealGuess, which challenges
+  users to guess the result of the evaluation of iCook expressions.
