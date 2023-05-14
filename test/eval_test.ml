@@ -120,6 +120,16 @@ let eval_let_expression_tests =
   |};
   ]
 
+let eval_bowl_tests =
+  [
+    eval_expression_test "nil" "[]" "[]";
+    eval_expression_test "" "[5]" "5 :: []";
+    eval_expression_test "" "[5, 6]" "5 :: [6]";
+    eval_expression_test "" "[5, true]" "5 :: [true]";
+    eval_expression_test "" "[5, [4], 6]" "5 :: [4] :: [6]";
+    eval_expression_test "" "[4, true, [8]]" "[4, true, [8]]";
+  ]
+
 let eval_tests =
   List.flatten
     [
@@ -130,4 +140,5 @@ let eval_tests =
       eval_binop_tests;
       eval_function_tests;
       eval_let_expression_tests;
+      eval_bowl_tests;
     ]
